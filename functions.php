@@ -39,6 +39,50 @@ function food_css_icon(){
 	</style>';
 }
 
+/**
+ * Custom meta box to add additional info for the product.
+ * @see https://www.sitepoint.com/adding-meta-boxes-post-types-wordpress/
+ */
+function custom_additional_info_meta_box() {
+
+	add_meta_box(
+		'custom-additional-info-wrapper',
+		__( 'Información adicional', 'woocommerce' ),
+		'custom_additional_info_meta_box_callback'
+	);
+
+}
+
+add_action( 'add_meta_boxes_product', 'custom_additional_info_meta_box' );
+
+function custom_additional_info_meta_box_callback( $post ) {
+
+	$value = get_post_meta( $post->ID, '_custom_additional_info', true );
+
+	echo '<textarea style="width:100%" id="custom_additional_info" name="custom_additional_info">' . esc_attr( $value ) . '</textarea>';
+}
+
+/**
+ * When the product post is saved, saves our custom data.
+ *
+ * @param int $post_id
+ */
+function save_custom_additional_info_meta_box_data( $post_id ) {
+
+	// Make sure that it is set.
+	if ( ! isset( $_POST['custom_additional_info'] ) ) {
+			return;
+	}
+
+	// Sanitize user input.
+	$my_data = sanitize_text_field( $_POST['custom_additional_info'] );
+
+	// Update the meta field in the database.
+	update_post_meta( $post_id, '_custom_additional_info', $my_data );
+}
+
+add_action( 'save_post', 'save_custom_additional_info_meta_box_data' );
+
 // *********************************
 // SAVE PRODUCT NUTRITION FACTS INFO
 // *********************************
@@ -240,6 +284,7 @@ function food_save_fields( $id, $post ) {
  * Add a custom product data tab.
  * @see https://docs.woocommerce.com/document/editing-product-data-tabs/
  * @see https://awhitepixel.com/blog/woocommerce-product-data-custom-fields-tabs/
+ * @see https://rudrastyh.com/woocommerce/rename-product-tabs-and-heading.html
  */
 add_filter( 'woocommerce_product_tabs', 'woo_custom_product_tab' );
 
@@ -249,7 +294,7 @@ function woo_custom_product_tab( $tabs ) {
 
 	$show_food_info = $product->get_meta('show_food_info');
 
-	// Add the nutrition facts tab only if it has been indicated.
+	// Add the custom nutrition facts tab only if it has been indicated.
 	if ($show_food_info == "yes") {
 		$tabs['nutrition_facts'] = array(
 			'title' 	=> __( 'Valors nutricionals', 'woocommerce' ),
@@ -258,7 +303,22 @@ function woo_custom_product_tab( $tabs ) {
 		);
 	}
 
- 	// Remove the description tab from the product page.
+	// Manage the additional info tab.
+	$additional_info = $product->get_meta('_custom_additional_info');
+
+	if (!empty($additional_info)) {
+		$tabs['additional_information']['title'] = __( 'Informació adicional' );
+		$tabs['additional_information']['callback'] = function () use ($additional_info) {
+			echo '<p>' . $additional_info . '</p>';
+		};
+	} else {
+		unset( $tabs['additional_information'] );
+	}
+
+	// Rename the reviews tab.
+	$tabs['reviews']['title'] = __( 'Valoracions (' . $product->get_review_count() . ')' );
+
+ 	// Remove the default description tab from the product page.
 	unset( $tabs['description'] );
 
 	return $tabs;
