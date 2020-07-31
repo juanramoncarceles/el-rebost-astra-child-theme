@@ -142,6 +142,8 @@ function food_product_panels(){
 
 	echo '<p>Información nutricional por 100g / 100ml</p>';
 
+	$current_values = get_post_meta( get_the_ID(), 'food_product_nutrition_facts', true );
+
 	// Show in front-end
 	woocommerce_wp_checkbox( array(
 		'id'                => 'show_food_info',
@@ -154,7 +156,7 @@ function food_product_panels(){
 	// Input calories
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_calories',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_calories', true ),
+		'value'             => isset($current_values['calories']) ? $current_values['calories'] : '',
 		'label'             => 'Valor energético',
 		'desc_tip'					=> true,
 		'description'       => 'El valor energético o calorías del producto alimenticio.'
@@ -163,7 +165,7 @@ function food_product_panels(){
 	// Input fats
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_fats',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_fats', true ),
+		'value'             => isset($current_values['fats']) ? $current_values['fats'] : '',
 		'label'             => 'Grasas',
 		'desc_tip'					=> true,
 		'description'       => 'Las grasas del producto alimenticio.'
@@ -172,7 +174,7 @@ function food_product_panels(){
 	// Input saturated fats
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_saturated_fats',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_saturated_fats', true ),
+		'value'             => isset($current_values['saturated_fats']) ? $current_values['saturated_fats'] : '',
 		'label'             => 'Grasas saturadas',
 		'desc_tip'					=> true,
 		'description'       => 'Las grasas saturadas del producto alimenticio.'
@@ -181,7 +183,7 @@ function food_product_panels(){
 	// Input carbs
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_carbs',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_carbs', true ),
+		'value'             => isset($current_values['carbs']) ? $current_values['carbs'] : '',
 		'label'             => 'Hidratos de carbono',
 		'desc_tip'					=> true,
 		'description'       => 'Los hidratos de carbono del producto alimenticio.'
@@ -190,7 +192,7 @@ function food_product_panels(){
 	// Input sugar
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_sugar',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_sugar', true ),
+		'value'             => isset($current_values['sugar']) ? $current_values['sugar'] : '',
 		'label'             => 'Azúcares',
 		'desc_tip'					=> true,
 		'description'       => 'Los azúcares del producto alimenticio.'
@@ -199,7 +201,7 @@ function food_product_panels(){
 	// Input fiber
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_fiber',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_fiber', true ),
+		'value'             => isset($current_values['fiber']) ? $current_values['fiber'] : '',
 		'label'             => 'Fibra',
 		'desc_tip'					=> true,
 		'description'       => 'La fibra del producto alimenticio.'
@@ -208,7 +210,7 @@ function food_product_panels(){
 	// Input proteins
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_proteins',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_proteins', true ),
+		'value'             => isset($current_values['proteins']) ? $current_values['proteins'] : '',
 		'label'             => 'Proteínas',
 		'desc_tip'					=> true,
 		'description'       => 'Las proteínas del producto alimenticio.'
@@ -217,7 +219,7 @@ function food_product_panels(){
 	// Input salt
 	woocommerce_wp_text_input( array(
 		'id'                => 'food_product_salt',
-		'value'             => get_post_meta( get_the_ID(), 'food_product_salt', true ),
+		'value'             => isset($current_values['salt']) ? $current_values['salt'] : '',
 		'label'             => 'Sal',
 		'desc_tip'					=> true,
 		'description'       => 'La sal del producto alimenticio.'
@@ -255,25 +257,41 @@ function food_save_fields( $id, $post ) {
 
 	update_post_meta( $id, 'show_food_info', $_POST['show_food_info'] );
 
-	//if( !empty( $_POST['food_product_proteins'] ) ) {
-	update_post_meta( $id, 'food_product_calories', $_POST['food_product_calories'] );
-	//} else {
-	//	delete_post_meta( $id, 'food_product_proteins' );
-	//}
+	$nutrition_facts = [];
 
-	update_post_meta( $id, 'food_product_fats', $_POST['food_product_fats'] );
+	if( !empty( $_POST['food_product_calories'] ) ) {
+		$nutrition_facts['calories'] = $_POST['food_product_calories'];
+	}
 
-	update_post_meta( $id, 'food_product_saturated_fats', $_POST['food_product_saturated_fats'] );
+	if( !empty( $_POST['food_product_fats'] ) ) {
+		$nutrition_facts['fats'] = $_POST['food_product_fats'];
+	}
 
-	update_post_meta( $id, 'food_product_carbs', $_POST['food_product_carbs'] );
+	if( !empty( $_POST['food_product_saturated_fats'] ) ) {
+		$nutrition_facts['saturated_fats'] = $_POST['food_product_saturated_fats'];
+	}
 
-	update_post_meta( $id, 'food_product_sugar', $_POST['food_product_sugar'] );
+	if( !empty( $_POST['food_product_carbs'] ) ) {
+		$nutrition_facts['carbs'] = $_POST['food_product_carbs'];
+	}
 
-	update_post_meta( $id, 'food_product_fiber', $_POST['food_product_fiber'] );
+	if( !empty( $_POST['food_product_sugar'] ) ) {
+		$nutrition_facts['sugar'] = $_POST['food_product_sugar'];
+	}
 
-	update_post_meta( $id, 'food_product_proteins', $_POST['food_product_proteins'] );
-	
-	update_post_meta( $id, 'food_product_salt', $_POST['food_product_salt'] );
+	if( !empty( $_POST['food_product_fiber'] ) ) {
+		$nutrition_facts['fiber'] = $_POST['food_product_fiber'];
+	}
+
+	if( !empty( $_POST['food_product_proteins'] ) ) {
+		$nutrition_facts['proteins'] = $_POST['food_product_proteins'];
+	}
+
+	if( !empty( $_POST['food_product_salt'] ) ) {
+		$nutrition_facts['salt'] = $_POST['food_product_salt'];
+	}
+
+	update_post_meta( $id, 'food_product_nutrition_facts', $nutrition_facts );
  
 }
 
@@ -293,9 +311,10 @@ function woo_custom_product_tab( $tabs ) {
 	global $product;
 
 	$show_food_info = $product->get_meta('show_food_info');
+	$nutrition_facts = $product->get_meta('food_product_nutrition_facts');
 
-	// Add the custom nutrition facts tab only if it has been indicated.
-	if ($show_food_info == "yes") {
+	// Add the custom nutrition facts tab only if it has been indicated and there are values.
+	if ($show_food_info == "yes" && !empty($nutrition_facts)) {
 		$tabs['nutrition_facts'] = array(
 			'title' 	=> __( 'Valors nutricionals', 'woocommerce' ),
 			'priority' 	=> 50,
@@ -331,66 +350,50 @@ function woo_custom_product_tab( $tabs ) {
 function woo_nutrition_tab_content() {
 
 	global $product;
-
+	//echo $product;
 	// The nutrition values.
-	$calories = $product->get_meta('food_product_calories');
-	$fats = $product->get_meta('food_product_fats');
-	$saturated_fats = $product->get_meta('food_product_saturated_fats');
-	$carbs = $product->get_meta('food_product_carbs');
-	$sugar = $product->get_meta('food_product_sugar');
-	$fiber = $product->get_meta('food_product_fiber');
-	$proteins = $product->get_meta('food_product_proteins');
-	$salt = $product->get_meta('food_product_salt');
+	$nutrition_facts = $product->get_meta('food_product_nutrition_facts');
+	//echo $nutrition_facts; // Si es un empty string return o no existe return
 	
 	// If after checking all the data remains false means that there is no data to show.
-	$show_values = false;
+	//$show_values = false;
 
-	if (!empty($calories)) {
-		$nutrition_table_rows .= create_table_row( __( 'Valor energètic', 'woocommerce' ), $calories );
-		$show_values = true;
+	if (array_key_exists('calories', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Valor energètic', 'woocommerce' ), $nutrition_facts['calories'] );
 	}
 
-	if (!empty($fats)) {
-		$nutrition_table_rows .= create_table_row( __( 'Greixos', 'woocommerce' ), $fats );
-		$show_values = true;
+	if (array_key_exists('fats', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Greixos', 'woocommerce' ), $nutrition_facts['fats'] );
 	}
 
-	if (!empty($saturated_fats)) {
-		$nutrition_table_rows .= create_table_row( __( 'Greixos saturats', 'woocommerce' ), $saturated_fats );
-		$show_values = true;
+	if (array_key_exists('saturated_fats', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Greixos saturats', 'woocommerce' ), $nutrition_facts['saturated_fats'] );
 	}
 
-	if (!empty($carbs)) {
-		$nutrition_table_rows .= create_table_row( __( 'Hidrats de carboni', 'woocommerce' ), $carbs );
-		$show_values = true;
+	if (array_key_exists('carbs', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Hidrats de carboni', 'woocommerce' ), $nutrition_facts['carbs'] );
 	}
 
-	if (!empty($sugar)) {
-		$nutrition_table_rows .= create_table_row( __( 'Sucres', 'woocommerce' ), $sugar );
-		$show_values = true;
+	if (array_key_exists('sugar', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Sucres', 'woocommerce' ), $nutrition_facts['sugar'] );
 	}
 
-	if (!empty($fiber)) {
-		$nutrition_table_rows .= create_table_row( __( 'Fibra', 'woocommerce' ), $fiber );
-		$show_values = true;
+	if (array_key_exists('fiber', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Fibra', 'woocommerce' ), $nutrition_facts['fiber'] );
 	}
 
-	if (!empty($proteins)) {
-		$nutrition_table_rows .= create_table_row( __( 'Proteines', 'woocommerce' ), $proteins );
-		$show_values = true;
+	if (array_key_exists('proteins', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Proteines', 'woocommerce' ), $nutrition_facts['proteins'] );
 	}
 
-	if (!empty($salt)) {
-		$nutrition_table_rows .= create_table_row( __( 'Sal', 'woocommerce' ), $salt );
-		$show_values = true;
+	if (array_key_exists('salt', $nutrition_facts)) {
+		$nutrition_table_rows .= create_table_row( __( 'Sal', 'woocommerce' ), $nutrition_facts['salt'] );
 	}
 
-	if ($show_values) {
-		echo '<p>Informació nutricional per 100g / 100ml<p>';
-		echo '<table class="woocommerce-product-attributes shop_attributes"><tbody>';
-		echo $nutrition_table_rows;
-		echo '</tbody></table>';
-	}
+	echo '<p>Informació nutricional per 100g / 100ml<p>';
+	echo '<table class="woocommerce-product-attributes shop_attributes"><tbody>';
+	echo $nutrition_table_rows;
+	echo '</tbody></table>';
 
 }
 
