@@ -465,12 +465,11 @@ function change_product_price_html( $price, $product ) {
 	$weight_measure = $product->get_meta('sell_weight_measure');
 
 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-		$price_html = sprintf( '<span class="amount">%s / %s %s</span>', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+		return sprintf( '<span class="amount">%s / %s %s</span>', $price, $weight_measure, get_option('woocommerce_weight_unit') );
 	} else {
-		$price_html = sprintf( '<span class="amount">%s / ud</span>', $price );
+		return sprintf( '<span class="amount">%s / ud</span>', $price );
 	}
 
-	return $price_html;
 }
 
 
@@ -483,12 +482,11 @@ function change_product_price_html( $price, $product ) {
 // 	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
 
 // 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-// 		$price = sprintf( '%s / %s %s', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+// 		return sprintf( '%s / %s %s', $price, $weight_measure, get_option('woocommerce_weight_unit') );
 // 	} else {
-// 		$price = $price . ' / ud';
+// 		return $price . ' / ud';
 // 	}
 
-// 	return $price;
 // }
 
 
@@ -509,23 +507,40 @@ function change_woocommerce_cart_item_quantity($product_quantity, $cart_item_key
 }
 
 
-// Change how quantities are displayed in the checkout page.
+// Just remove the default quantity added after the name in the checkout page.
 add_filter( 'woocommerce_checkout_cart_item_quantity', 'change_checkout_quantities', 10, 2 );
 
 function change_checkout_quantities ( $quantity, $cart_item ) {
+
+	// $sell_by_weight = get_post_meta( $cart_item['product_id'], 'sell_by_weight', true );
+	// $weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
+
+	// if ($sell_by_weight == "yes" && $weight_measure != "") {
+	// 	return sprintf( '<div class="product-quantity">(%s %s)</div>', $cart_item['quantity'] * $weight_measure, get_option('woocommerce_weight_unit') );
+	// } else {
+	// 	return sprintf( '<div class="product-quantity">(%s ud)</div>', $cart_item['quantity'] );
+	// }
+
+	return;
+
+}
+
+
+// Add to the subtotal the amount in weight or units in the cart and checkout pages. 
+add_filter( 'woocommerce_cart_item_subtotal', 'filter_woocommerce_cart_item_subtotal', 10, 3 ); 
+
+function filter_woocommerce_cart_item_subtotal( $wc, $cart_item, $cart_item_key ) { 
 
 	$sell_by_weight = get_post_meta( $cart_item['product_id'], 'sell_by_weight', true );
 	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
 
 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-		$cart_item = sprintf( '<strong class="product-quantity">(%s %s)</strong>', $cart_item['quantity'] * $weight_measure, get_option('woocommerce_weight_unit') );
+		return sprintf( '%s (%s %s)', $wc, $cart_item['quantity'] * $weight_measure, get_option('woocommerce_weight_unit') );
 	} else {
-		$cart_item = sprintf( '<strong class="product-quantity">(%s ud)</strong>', $cart_item['quantity'] );
+		return sprintf( '%s (%s ud)', $wc, $cart_item['quantity'] );
 	}
 
-	return $cart_item;
-
-}
+};
 
 
 // Change cart in menu total amount to display the total of different types of products.
