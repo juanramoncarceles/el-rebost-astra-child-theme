@@ -404,3 +404,133 @@ function create_table_row( $label, $value) {
 	$table_rows .= '</tr>';
 	return $table_rows;
 }
+
+
+// Show sell by weight options.
+add_action( 'woocommerce_product_options_general_product_data', 'sell_by_weight_option_group' );
+ 
+function sell_by_weight_option_group() {
+
+	echo '<div class="option_group">';
+
+	woocommerce_wp_checkbox( array(
+		'id'      => 'sell_by_weight',
+		'value'   => get_post_meta( get_the_ID(), 'sell_by_weight', true ),
+		'label'   => 'Vender por peso',
+		'desc_tip' => true,
+		'description' => 'Marcar si es un producto que se vende por peso.',
+	) );
+
+	woocommerce_wp_select( array(
+		'id'          => 'sell_weight_measure',
+		'value'       => get_post_meta( get_the_ID(), 'sell_weight_measure', true ),
+		//'wrapper_class' => 'show_if_downloadable',
+		'label'       => 'Medida de peso',
+		'options'     => array( '' => 'Selecciona una opción', '50' => '50', '100' => '100'),
+		'desc_tip' => true,
+		'description' => 'Elegir la medida de peso. Utiliza las unidades indicadas en los ajustes de Woocommerce. Solo tiene efecto si se habilita la opción de vender por peso.',
+	) );
+ 
+	echo '</div>';
+
+}
+
+
+// Save the sell by weight data.
+add_action( 'woocommerce_process_product_meta', 'sell_by_weight_save_fields', 10, 2 );
+
+function sell_by_weight_save_fields( $id, $post ){
+ 
+	if( !empty( $_POST['sell_by_weight'] ) ) {
+		update_post_meta( $id, 'sell_by_weight', $_POST['sell_by_weight'] );
+	} else {
+		delete_post_meta( $id, 'sell_by_weight' );
+	}
+
+	if( !empty( $_POST['sell_by_weight'] ) ) {
+		update_post_meta( $id, 'sell_weight_measure', $_POST['sell_weight_measure'] );
+	} else {
+		delete_post_meta( $id, 'sell_weight_measure' );
+	}
+ 
+}
+
+
+// Change how price is displayed in the product page.
+add_filter( 'woocommerce_get_price_html', 'change_product_price_html', 10, 2 );
+
+function change_product_price_html( $price, $product ) {
+	
+	$sell_by_weight = $product->get_meta('sell_by_weight');
+	$weight_measure = $product->get_meta('sell_weight_measure');
+
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		$price_html = sprintf( '<span class="amount">%s / %s %s</span>', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+	} else {
+		$price_html = sprintf( '<span class="amount">%s / ud</span>', $price );
+	}
+
+	return $price_html;
+}
+
+
+// Change how price is displayed in the cart page.
+// add_filter( 'woocommerce_cart_item_price', 'change_product_price_cart', 10, 2 );
+
+// function change_product_price_cart( $price, $cart_item ) {
+
+// 	$sell_by_weight = get_post_meta( $cart_item['product_id'], 'sell_by_weight', true );
+// 	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
+
+// 	if ($sell_by_weight == "yes" && $weight_measure != "") {
+// 		$price = sprintf( '%s / %s %s', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+// 	} else {
+// 		$price = $price . ' / ud';
+// 	}
+
+// 	return $price;
+// }
+
+
+// Change how quantities are displayed in the cart page.
+add_filter( 'woocommerce_cart_item_quantity', 'change_woocommerce_cart_item_quantity', 10, 3 );
+
+function change_woocommerce_cart_item_quantity($product_quantity, $cart_item_key, $cart_item ) {
+
+	$sell_by_weight = get_post_meta( $cart_item['product_id'], 'sell_by_weight', true );
+	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
+
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		return $product_quantity . sprintf( '&times; %s %s', $weight_measure, get_option('woocommerce_weight_unit') );
+	} else {
+		return $product_quantity;
+	}
+
+}
+
+
+// Change how quantities are displayed in the checkout page.
+add_filter( 'woocommerce_checkout_cart_item_quantity', 'change_checkout_quantities', 10, 2 );
+
+function change_checkout_quantities ( $quantity, $cart_item ) {
+
+	$sell_by_weight = get_post_meta( $cart_item['product_id'], 'sell_by_weight', true );
+	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
+
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		$cart_item = sprintf( '<strong class="product-quantity">(%s %s)</strong>', $cart_item['quantity'] * $weight_measure, get_option('woocommerce_weight_unit') );
+	} else {
+		$cart_item = sprintf( '<strong class="product-quantity">(%s ud)</strong>', $cart_item['quantity'] );
+	}
+
+	return $cart_item;
+
+}
+
+
+// Change cart in menu total amount to display the total of different types of products.
+add_filter( 'astra_woo_header_cart_total', 'custom_cart_total' );
+
+function custom_cart_total() {
+	echo count( WC()->cart->get_cart() );
+}
