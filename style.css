@@ -9,3 +9,19 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: astra-child-el-rebost
 Template: astra
 */
+
+
+/************************** MAIN MENU SUBMENU LIST ***************************/
+
+ul.sub-menu {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+ul.sub-menu > li {
+  width: 50%;
+}
+
+.main-header-menu .sub-menu {
+  width: 300px;
+}
