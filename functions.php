@@ -317,7 +317,7 @@ function woo_custom_product_tab( $tabs ) {
 	if ($show_food_info == "yes" && !empty($nutrition_facts)) {
 		$tabs['nutrition_facts'] = array(
 			'title' 	=> __( 'Valors nutricionals', 'woocommerce' ),
-			'priority' 	=> 50,
+			'priority' 	=> 5,
 			'callback' 	=> 'woo_nutrition_tab_content'
 		);
 	}
@@ -327,6 +327,7 @@ function woo_custom_product_tab( $tabs ) {
 
 	if (!empty($additional_info)) {
 		$tabs['additional_information']['title'] = __( 'Informació adicional' );
+		$tabs['additional_information']['priority'] = 10;
 		$tabs['additional_information']['callback'] = function () use ($additional_info) {
 			echo '<p>' . $additional_info . '</p>';
 		};
@@ -336,6 +337,7 @@ function woo_custom_product_tab( $tabs ) {
 
 	// Rename the reviews tab.
 	$tabs['reviews']['title'] = __( 'Valoracions (' . $product->get_review_count() . ')' );
+	$tabs['reviews']['priority'] = 15;
 
  	// Remove the default description tab from the product page.
 	unset( $tabs['description'] );
@@ -425,7 +427,7 @@ function sell_by_weight_option_group() {
 		'id'          => 'sell_weight_measure',
 		'value'       => get_post_meta( get_the_ID(), 'sell_weight_measure', true ),
 		//'wrapper_class' => 'show_if_downloadable',
-		'label'       => 'Medida de peso',
+		'label'       => sprintf( 'Medida de peso (%s)', get_option('woocommerce_weight_unit') ),
 		'options'     => array( '' => 'Selecciona una opción', '50' => '50', '100' => '100'),
 		'desc_tip' => true,
 		'description' => 'Elegir la medida de peso. Utiliza las unidades indicadas en los ajustes de Woocommerce. Solo tiene efecto si se habilita la opción de vender por peso.',
