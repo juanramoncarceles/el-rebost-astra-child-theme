@@ -1,0 +1,23 @@
+ToDos:
+  ☐ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high
+  ☐ Imágenes de producto más pequeñas: Empezando por los productos relacionados, pero quizás también en la página del producto y en el listado de productos.
+    Página tienda con cuatro columnas en vez de tres?
+  ☐ Poner la fuente "Raleway".
+  ☐ Indentar las dos filas de la tabla de valores nutricionales (Grasas satuaradas y azúcares). @low 
+  ☐ Poner la información adicional en negrita.
+    Preguntar si lo que quiere es solo poner algunas palabras entonces la unica opción será la de permitir usar HTML, e utilizar <strong>...</strong> para indicarlo.
+
+Notas:
+  ☐ Mirar como funciona la funcion __() para las traducciones, o como se hace para tener en dos idiomas la web. @high 
+  ☐ Plugin "Price per Unit Pro" / "Woocommerce Measurement Price Calculator" ?
+
+
+Hecho:
+  ✔ El precio de los productos que se venden por peso es en Kg asi que hay que calcular el correspondiente en gramos. @critical @done(20-08-16 22:43)
+  ✔ Poner en dos columnas los contenidos de la pestaña "alimentació" ya que es demasiado larga. @done(20-08-16 22:43)
+  ✔ Poner antes la pestaña de información adicional que la de valores nutricionales. @done(20-08-16 22:41)
+  
+
+
+Temas para comentar:
+  ☐ Explicar como pueden cambiar las tipografias para hacer varias pruebas. (Apariencia > ...)

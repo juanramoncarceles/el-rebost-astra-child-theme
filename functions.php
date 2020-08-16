@@ -313,26 +313,26 @@ function woo_custom_product_tab( $tabs ) {
 	$show_food_info = $product->get_meta('show_food_info');
 	$nutrition_facts = $product->get_meta('food_product_nutrition_facts');
 
-	// Add the custom nutrition facts tab only if it has been indicated and there are values.
-	if ($show_food_info == "yes" && !empty($nutrition_facts)) {
-		$tabs['nutrition_facts'] = array(
-			'title' 	=> __( 'Valors nutricionals', 'woocommerce' ),
-			'priority' 	=> 5,
-			'callback' 	=> 'woo_nutrition_tab_content'
-		);
-	}
-
 	// Manage the additional info tab.
 	$additional_info = $product->get_meta('_custom_additional_info');
 
 	if (!empty($additional_info)) {
 		$tabs['additional_information']['title'] = __( 'Informació adicional' );
-		$tabs['additional_information']['priority'] = 10;
+		$tabs['additional_information']['priority'] = 5;
 		$tabs['additional_information']['callback'] = function () use ($additional_info) {
-			echo '<p>' . $additional_info . '</p>';
+			echo '<p><strong>' . $additional_info . '</strong></p>';
 		};
 	} else {
 		unset( $tabs['additional_information'] );
+	}
+
+	// Add the custom nutrition facts tab only if it has been indicated and there are values.
+	if ($show_food_info == "yes" && !empty($nutrition_facts)) {
+		$tabs['nutrition_facts'] = array(
+			'title' 	=> __( 'Valors nutricionals', 'woocommerce' ),
+			'priority' 	=> 10,
+			'callback' 	=> 'woo_nutrition_tab_content'
+		);
 	}
 
 	// Rename the reviews tab.
@@ -574,7 +574,7 @@ function wc_recalc_prices_by_weight( $cart_object ) {
 }
 
 
-// Changes the quantities (including price) in the mini cart widget.
+// Changes how quantities (including price) are displayed in the mini cart widget.
 add_filter('woocommerce_widget_cart_item_quantity', 'custom_wc_widget_cart_item_quantity', 10, 3 );
 function custom_wc_widget_cart_item_quantity( $output, $cart_item, $cart_item_key ) {
 	$product_id = $cart_item['product_id'];
