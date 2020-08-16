@@ -467,7 +467,14 @@ function change_product_price_html( $price, $product ) {
 	$weight_measure = $product->get_meta('sell_weight_measure');
 
 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-		return sprintf( '<span class="amount">%s / %s %s</span>', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+		// Important: The product price in case of weight is by Kg.
+		$price_num = $product->price;
+		if ($weight_measure == '100') {
+			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 100);
+		} else if ($weight_measure == '50') {
+			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 50);
+		}
+		return sprintf( '<span class="amount">%s %s / %s %s</span>', $price_formatted, get_woocommerce_currency_symbol(), $weight_measure, get_option('woocommerce_weight_unit') );
 	} else {
 		return sprintf( '<span class="amount">%s / ud</span>', $price );
 	}
@@ -484,12 +491,30 @@ function change_product_price_html( $price, $product ) {
 // 	$weight_measure = get_post_meta( $cart_item['product_id'], 'sell_weight_measure', true );
 
 // 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-// 		return sprintf( '%s / %s %s', $price, $weight_measure, get_option('woocommerce_weight_unit') );
+// 		$formatted_price = $cart_item["data"]->price;
+// 		if ($weight_measure == '100') {
+// 			return '<span class="woocommerce-Price-amount amount">' . format_price_by_weight_from_kg_to_g($formatted_price, 100) . ' <span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span></span>';
+// 		} else if ($weight_measure == '50') {
+// 			return '<span class="woocommerce-Price-amount amount">' . format_price_by_weight_from_kg_to_g($formatted_price, 50) . ' <span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span></span>';
+// 		}
 // 	} else {
-// 		return $price . ' / ud';
+// 		return $price;
 // 	}
 
 // }
+
+
+/**
+ * Formats the price by weight for the specified grams measure.
+ * It uses the price by weight for 1 Kg.
+ * It also formats the price with the decimal and thousand symbols specified in the Woocommerce settings.
+ * @param {number} The price for 1 Kg.
+ * @param {number} The amount of grams to format the price to. For example by 100 g.
+ * @return {string} The string representation of the price.
+ */
+function format_price_by_weight_from_kg_to_g($kg_price, $g_measure) {
+	return number_format($kg_price / (1000 / $g_measure), 2, wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
+}
 
 
 // Change how quantities are displayed in the cart page.
@@ -525,6 +550,47 @@ function change_checkout_quantities ( $quantity, $cart_item ) {
 
 	return;
 
+}
+
+
+// Sets the right value for items sold by weight internally once they reach the cart page.
+// By changing the price internally it is ready for the successive steps like checkout.
+add_action( 'woocommerce_before_calculate_totals', 'wc_recalc_prices_by_weight' );
+ 
+function wc_recalc_prices_by_weight( $cart_object ) {
+	foreach ( $cart_object->get_cart() as $cart_item_key => $cart_item ) {
+		$product_id = $cart_item['product_id'];
+		$sell_by_weight = get_post_meta( $product_id, 'sell_by_weight', true );
+		$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
+		if ($sell_by_weight == "yes" && $weight_measure != "") {
+			$price = $cart_item['data']->get_price();
+			if ($weight_measure == '100') {
+				$cart_item['data']->set_price( $price / 10 );
+			} else if ($weight_measure == '50') {
+				$cart_item['data']->set_price( $price / 20 );
+			}
+		}
+	}
+}
+
+
+// Changes the quantities (including price) in the mini cart widget.
+add_filter('woocommerce_widget_cart_item_quantity', 'custom_wc_widget_cart_item_quantity', 10, 3 );
+function custom_wc_widget_cart_item_quantity( $output, $cart_item, $cart_item_key ) {
+	$product_id = $cart_item['product_id'];
+	$sell_by_weight = get_post_meta( $product_id, 'sell_by_weight', true );
+	$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		$price_num = $cart_item['data']->get_price();
+		if ($weight_measure == '100') {
+			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 100);
+		} else if ($weight_measure == '50') {
+			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 50);
+		}
+		return sprintf( '<span class="quantity">%s &times; <span class="woocommerce-Price-amount amount">%s <span class="woocommerce-Price-currencySymbol">%s</span></span></span>', $cart_item['quantity'], $price_formatted, get_woocommerce_currency_symbol() );
+	} else {
+		return $output;
+	}
 }
 
 
