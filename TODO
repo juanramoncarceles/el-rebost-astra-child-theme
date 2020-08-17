@@ -4,9 +4,9 @@ ToDos:
     Página tienda con cuatro columnas en vez de tres?
   ☐ Poner la fuente "Raleway".
   ☐ Indentar las dos filas de la tabla de valores nutricionales (Grasas satuaradas y azúcares). @low 
-  ☐ Poner la información adicional en negrita.
-    Preguntar si lo que quiere es solo poner algunas palabras entonces la unica opción será la de permitir usar HTML, e utilizar <strong>...</strong> para indicarlo.
+  ☐ La información adicional se ha de poder introducir como HTML con el objetivo de poder indicar una mínima estructura y estilo.
 
+  
 Notas:
   ☐ Mirar como funciona la funcion __() para las traducciones, o como se hace para tener en dos idiomas la web. @high 
   ☐ Plugin "Price per Unit Pro" / "Woocommerce Measurement Price Calculator" ?

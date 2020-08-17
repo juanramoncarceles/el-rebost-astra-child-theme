@@ -39,6 +39,10 @@ function food_css_icon(){
 	</style>';
 }
 
+// ****************************************************************************
+// ******************** CUSTOM ADDITIONAL INFO META BOX ***********************
+// ****************************************************************************
+
 /**
  * Custom meta box to add additional info for the product.
  * @see https://www.sitepoint.com/adding-meta-boxes-post-types-wordpress/
@@ -63,8 +67,7 @@ function custom_additional_info_meta_box_callback( $post ) {
 }
 
 /**
- * When the product post is saved, saves our custom data.
- *
+ * When the product post is saved, saves the additional info custom data.
  * @param int $post_id
  */
 function save_custom_additional_info_meta_box_data( $post_id ) {
@@ -83,9 +86,10 @@ function save_custom_additional_info_meta_box_data( $post_id ) {
 
 add_action( 'save_post', 'save_custom_additional_info_meta_box_data' );
 
-// *********************************
-// SAVE PRODUCT NUTRITION FACTS INFO
-// *********************************
+
+// ****************************************************************************
+// ******************** SAVE PRODUCT NUTRITION FACTS INFO *********************
+// ****************************************************************************
 
 /**
  * This adds an option like 'virtual' 'downloadable'
@@ -407,6 +411,10 @@ function create_table_row( $label, $value) {
 	return $table_rows;
 }
 
+
+// ****************************************************************************
+// *************************** SELL BY WEIGHT LOGIC ***************************
+// ****************************************************************************
 
 // Show sell by weight options.
 add_action( 'woocommerce_product_options_general_product_data', 'sell_by_weight_option_group' );
