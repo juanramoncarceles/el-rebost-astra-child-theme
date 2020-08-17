@@ -25,3 +25,31 @@ ul.sub-menu > li {
 .main-header-menu .sub-menu {
   width: 300px;
 }
+
+/************************* MAIN MENU ITEMS FONT SIZE *************************/
+
+ul.main-header-menu {
+  font-size: 15px;
+}
+
+@media (min-width: 922px) {
+  ul.main-header-menu {
+    font-size: 17px;
+  }
+}
+
+/******************************* STICKY HEADER *******************************/
+
+.ast-theme-transparent-header #masthead {
+  position: fixed;
+}
+
+.main-header-bar {
+  transition: background-color 1s, box-shadow 1s;
+}
+
+.main-header-bar.sticky-active {
+  background-color: #fff !important;
+  box-shadow: 0px 0px 6px rgb(0 0 0 / 0.4);
+  
+}
