@@ -42,6 +42,9 @@ function food_css_icon(){
 // ****************************************************************************
 // ******************** CUSTOM ADDITIONAL INFO META BOX ***********************
 // ****************************************************************************
+/**
+ * @see https://code.rohitink.com/2017/11/30/add-wysiwyg-editor-textarea-custom-meta-box-wordpress/
+ */
 
 /**
  * Custom meta box to add additional info for the product.
@@ -52,39 +55,65 @@ function custom_additional_info_meta_box() {
 	add_meta_box(
 		'custom-additional-info-wrapper',
 		__( 'Información adicional', 'woocommerce' ),
-		'custom_additional_info_meta_box_callback'
+		'custom_additional_info_html_meta_box'
 	);
 
 }
 
 add_action( 'add_meta_boxes_product', 'custom_additional_info_meta_box' );
 
-function custom_additional_info_meta_box_callback( $post ) {
+/**
+ * Creates a textarea input field with WYSIWYG editor.
+ */
+function custom_additional_info_html_meta_box( $post ) {
+	wp_nonce_field( '_additional_info_meta_nonce', 'additional_info_meta_nonce' );
 
-	$value = get_post_meta( $post->ID, '_custom_additional_info', true );
-
-	echo '<textarea style="width:100%" id="custom_additional_info" name="custom_additional_info">' . esc_attr( $value ) . '</textarea>';
+	// Get the current additional info meta content if any.
+	$meta_content = get_post_meta( $post->ID, '_custom_additional_info', true );
+	
+	wp_editor($meta_content, 'meta_content_editor', array(
+		//'wpautop'       => true, // Disabled since it does nothing.
+		'media_buttons' => false,
+		'textarea_name' => 'custom_additional_info',
+		'textarea_rows' => 10,
+		'teeny'         => true
+	));
 }
 
 /**
- * When the product post is saved, saves the additional info custom data.
+ * Saves the value of the meta box as post meta data only in admin screen.
  * @param int $post_id
  */
-function save_custom_additional_info_meta_box_data( $post_id ) {
+function save_additional_info_metadata( $post_id ) {
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
 
-	// Make sure that it is set.
-	if ( ! isset( $_POST['custom_additional_info'] ) ) {
-			return;
+	if ( ! isset( $_POST['additional_info_meta_nonce'] ) || ! wp_verify_nonce( $_POST['additional_info_meta_nonce'], '_additional_info_meta_nonce' ) ) return;
+	
+	if ( ! current_user_can( 'edit_post', $post_id ) ) return;
+ 
+	if ( isset( $_POST['custom_additional_info'] ) ) {
+		// Sanitize the input taking into account it is HTML. Another option would be with wp_kses_post().
+		$input_data = wp_kses( $_POST['custom_additional_info'] , array(
+			'a' => array(
+				'href' => array(),
+				'title' => array()
+			),
+			'ul' => array(),
+			'ol' => array(),
+			'li' => array(),
+			'br' => array(),
+			'em' => array(),
+			'del' => array(),
+			'strong' => array(),
+			'span' => array(
+				'style' => array()
+			),
+		));
+		update_post_meta( $post_id, '_custom_additional_info', $input_data );
 	}
-
-	// Sanitize user input.
-	$my_data = sanitize_text_field( $_POST['custom_additional_info'] );
-
-	// Update the meta field in the database.
-	update_post_meta( $post_id, '_custom_additional_info', $my_data );
 }
 
-add_action( 'save_post', 'save_custom_additional_info_meta_box_data' );
+add_action( 'save_post', 'save_additional_info_metadata' );
 
 
 // ****************************************************************************
@@ -324,7 +353,8 @@ function woo_custom_product_tab( $tabs ) {
 		$tabs['additional_information']['title'] = __( 'Informació adicional' );
 		$tabs['additional_information']['priority'] = 5;
 		$tabs['additional_information']['callback'] = function () use ($additional_info) {
-			echo '<p><strong>' . $additional_info . '</strong></p>';
+			// Important to wpautop() the output since it was saved from wp_editor() as metadata.
+			echo wpautop( $additional_info );
 		};
 	} else {
 		unset( $tabs['additional_information'] );
