@@ -1,7 +1,7 @@
 /******************************************************************************
  ***************************** STICKY HEADER **********************************
  *****************************************************************************/
-
+/*
 // Get a reference to the main menu container.
 const mainHeaderBar = document.querySelector('.main-header-bar');
 
@@ -16,3 +16,4 @@ window.addEventListener('scroll', () => {
     stickyActive = true;
   }
 });
+*/

@@ -27,7 +27,7 @@ ul.sub-menu > li {
 }
 
 /************************* MAIN MENU ITEMS FONT SIZE *************************/
-
+/*
 ul.main-header-menu {
   font-size: 15px;
 }
@@ -37,12 +37,14 @@ ul.main-header-menu {
     font-size: 17px;
   }
 }
+*/
 
 /******************************* STICKY HEADER *******************************/
 
 /* The css class ".ast-theme-transparent-header" is used by Astra on the body when the header is transparent and with position absolute */
 
 /* For the master header in any page */
+/*
 #masthead {
   position: fixed !important;
   left: 0;
@@ -64,3 +66,4 @@ body.ast-theme-transparent-header .main-header-bar.sticky-active {
 .main-header-bar.sticky-active {
   box-shadow: 0px 0px 6px rgb(0 0 0 / 0.4);
 }
+*/
