@@ -20,7 +20,7 @@ function enqueue_custom_styles_and_scripts() {
 
 	wp_enqueue_style( 'astra-child-el-rebost-theme-css', get_stylesheet_directory_uri() . '/style.css', array('astra-theme-css'), CHILD_THEME_ASTRA_CHILD_EL_REBOST_VERSION, 'all' );
 
-	wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
+	// wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
 
 }
 
@@ -656,4 +656,27 @@ add_filter( 'astra_woo_header_cart_total', 'custom_cart_total' );
 
 function custom_cart_total() {
 	echo count( WC()->cart->get_cart() );
+}
+
+
+// ****************************************************************************
+// ******************** SAVE PRODUCT NUTRITION FACTS INFO *********************
+// ****************************************************************************
+
+// Change the "add to cart" button text on product page.
+add_filter( 'woocommerce_product_single_add_to_cart_text', 'woocommerce_custom_single_add_to_cart_text' ); 
+function woocommerce_custom_single_add_to_cart_text() {
+  return __( 'Afegeix', 'woocommerce' ); 
+}
+
+// Change the "add to cart" button text on product archive (collection) page.
+add_filter( 'woocommerce_product_add_to_cart_text', 'woocommerce_custom_product_add_to_cart_text', 10, 2 );
+function woocommerce_custom_product_add_to_cart_text( $output, $instance ) {
+	global $product;
+	// Possible values: 'simple', 'grouped', 'variable', 'external'
+	if ( !$product->is_type( 'variable' ) && $instance->stock_status == "instock" ) {
+		return __( 'Afegeix', 'woocommerce' );
+	} else {
+		return $output;
+	}
 }
