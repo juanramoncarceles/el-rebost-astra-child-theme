@@ -67,3 +67,22 @@ body.ast-theme-transparent-header .main-header-bar.sticky-active {
   box-shadow: 0px 0px 6px rgb(0 0 0 / 0.4);
 }
 */
+
+/****************************** MENU WIDGET CART *****************************/
+
+/* Change the default widget cart width */
+.ast-site-header-cart .widget_shopping_cart {
+  width: 400px !important;
+}
+
+/* Custom style for the item quantity */
+
+.widget_cart_quantity_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.widget_cart_quantity_container > .subtotal {
+  text-align: center;
+}

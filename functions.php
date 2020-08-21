@@ -509,12 +509,9 @@ function change_product_price_html( $price, $product ) {
 	if ($sell_by_weight == "yes" && $weight_measure != "") {
 		// Important: The product price in case of weight is by Kg.
 		$price_num = $product->price;
-		if ($weight_measure == '100') {
-			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 100);
-		} else if ($weight_measure == '50') {
-			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 50);
-		}
-		return sprintf( '<span class="amount">%s %s / %s %s</span>', $price_formatted, get_woocommerce_currency_symbol(), $weight_measure, get_option('woocommerce_weight_unit') );
+		$price_grams = convert_price_from_kg_to_g($price_num, $weight_measure);
+		$price_formatted = wc_price( $price_grams );
+		return sprintf( '<span class="amount">%s / %s %s</span>', $price_formatted, $weight_measure, get_option('woocommerce_weight_unit') );
 	} else {
 		return sprintf( '<span class="amount">%s / ud</span>', $price );
 	}
@@ -545,15 +542,13 @@ function change_product_price_html( $price, $product ) {
 
 
 /**
- * Formats the price by weight for the specified grams measure.
- * It uses the price by weight for 1 Kg.
- * It also formats the price with the decimal and thousand symbols specified in the Woocommerce settings.
- * @param {number} The price for 1 Kg.
- * @param {number} The amount of grams to format the price to. For example by 100 g.
- * @return {string} The string representation of the price.
+ * Converts the price for 1 Kg to the price for the corresponding amount of grams.
+ * @param $kg_price The price for 1 Kg.
+ * @param $g_measure Should represent an amount of grams as an integer, either as a string or integer already.
+ * @return {number}
  */
-function format_price_by_weight_from_kg_to_g($kg_price, $g_measure) {
-	return number_format($kg_price / (1000 / $g_measure), 2, wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
+function convert_price_from_kg_to_g($kg_price, $g_measure) {
+	return $kg_price / (1000 / intval($g_measure));
 }
 
 
@@ -603,7 +598,7 @@ function wc_recalc_prices_by_weight( $cart_object ) {
 		$sell_by_weight = get_post_meta( $product_id, 'sell_by_weight', true );
 		$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
 		if ($sell_by_weight == "yes" && $weight_measure != "") {
-			$price = $cart_item['data']->get_price();
+			$price = $cart_item['data']->get_price(); // If this doesn't work take the original price form the product: $price_num = wc_get_product( $product_id )->get_price();
 			if ($weight_measure == '100') {
 				$cart_item['data']->set_price( $price / 10 );
 			} else if ($weight_measure == '50') {
@@ -615,22 +610,38 @@ function wc_recalc_prices_by_weight( $cart_object ) {
 
 
 // Changes how quantities (including price) are displayed in the mini cart widget.
+// Includes the total price for each item as well as if it's sold by weight or by unit.
 add_filter('woocommerce_widget_cart_item_quantity', 'custom_wc_widget_cart_item_quantity', 10, 3 );
 function custom_wc_widget_cart_item_quantity( $output, $cart_item, $cart_item_key ) {
 	$product_id = $cart_item['product_id'];
+	$product_quantity = $cart_item['quantity'];
 	$sell_by_weight = get_post_meta( $product_id, 'sell_by_weight', true );
 	$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
+	$price_num = wc_get_product( $product_id )->get_price();
 	if ($sell_by_weight == "yes" && $weight_measure != "") {
-		$price_num = $cart_item['data']->get_price();
-		if ($weight_measure == '100') {
-			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 100);
-		} else if ($weight_measure == '50') {
-			$price_formatted = format_price_by_weight_from_kg_to_g($price_num, 50);
-		}
-		return sprintf( '<span class="quantity">%s &times; <span class="woocommerce-Price-amount amount">%s <span class="woocommerce-Price-currencySymbol">%s</span></span></span>', $cart_item['quantity'], $price_formatted, get_woocommerce_currency_symbol() );
+		// Don't use $cart_item['data']->get_price() because since sometimes the calculate_totals hook has already calculated the price it gets formatted twice.
+		$weight_unit = get_option('woocommerce_weight_unit');
+		$price_grams = convert_price_from_kg_to_g($price_num, $weight_measure);
+		$price_formatted = wc_price( $price_grams );
+		$total_price = wc_price($product_quantity * $price_grams);
+		$sold_by = $weight_measure . " " . $weight_unit;
+		$total_weight = $product_quantity * $weight_measure . " " . $weight_unit;
+		return cart_widget_quantity_html($price_formatted, $sold_by, $product_quantity, $total_price, $total_weight);
 	} else {
-		return $output;
+		$total_price = wc_price($product_quantity * $price_num);
+		return cart_widget_quantity_html(wc_price($price_num), 'ud', $product_quantity, $total_price);
 	}
+}
+
+
+/**
+ * Creates a string that corresponds with the HTML for an item quantity in the widget cart.
+ */
+function cart_widget_quantity_html($single_price, $sold_by, $quantity, $total_price, $total_weight = "") {
+	if ($total_weight != "") {
+		$total_weight = sprintf('<br><span>(%s)</span>', $total_weight);
+	}
+	return sprintf('<div class="widget_cart_quantity_container"><div>%s<span> / %s</span></div><div><span>&times; %s</span></div><div class="subtotal">%s%s</div></div>', $single_price, $sold_by, $quantity, $total_price, $total_weight);
 }
 
 
