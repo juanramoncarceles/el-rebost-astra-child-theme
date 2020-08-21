@@ -1,14 +1,17 @@
 ToDos:
   ☐ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high
-  ☐ Imágenes de producto más pequeñas: Empezando por los productos relacionados, pero quizás también en la página del producto y en el listado de productos.
+  ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @high 
+  ☐ Hacer que sea una web multilanguage. Entender la función __() y ver si la mejor opción es algún plugin como WMPL. @high 
+    https://docs.woocommerce.com/document/woocommerce-localization/
+    https://betterstudio.com/blog/change-woocommerce-language/
+  ☐ Añadir los datos de los pesos en el email del pedido. @high 
+  ☐ Imágenes de producto más pequeñas: Empezando por los productos relacionados, pero quizás también en la página del producto y en el listado de productos. ASTRA PRO.
     Página tienda con cuatro columnas en vez de tres?
-  ☐ Poner la fuente "Raleway".
   ☐ Indentar las dos filas de la tabla de valores nutricionales (Grasas satuaradas y azúcares). @low 
-  ☐ La información adicional se ha de poder introducir como HTML con el objetivo de poder indicar una mínima estructura y estilo.
+  ☐ Mirar si se puede hacer que las páginas de las categorias (por ejemplo 'algas') no tengan en la url el fragmento /categoria/.
 
   
 Notas:
-  ☐ Mirar como funciona la funcion __() para las traducciones, o como se hace para tener en dos idiomas la web. @high 
   ☐ Plugin "Price per Unit Pro" / "Woocommerce Measurement Price Calculator" ?
 
 
@@ -16,6 +19,8 @@ Hecho:
   ✔ El precio de los productos que se venden por peso es en Kg asi que hay que calcular el correspondiente en gramos. @critical @done(20-08-16 22:43)
   ✔ Poner en dos columnas los contenidos de la pestaña "alimentació" ya que es demasiado larga. @done(20-08-16 22:43)
   ✔ Poner antes la pestaña de información adicional que la de valores nutricionales. @done(20-08-16 22:41)
+  ✔ Poner la fuente "Raleway". @done(20-08-21 12:43)
+  ✔ La información adicional se ha de poder introducir como HTML con el objetivo de poder indicar una mínima estructura y estilo. @done(20-08-21 12:43)
   
 
 
