@@ -22,6 +22,10 @@ function enqueue_custom_styles_and_scripts() {
 
 	// wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
 
+	if (is_product()) {
+		wp_enqueue_script( 'product-page-el-rebost', get_stylesheet_directory_uri() . '/product_page.js', false, '1.0.0', true );
+	}
+
 }
 
 add_action( 'wp_enqueue_scripts', 'enqueue_custom_styles_and_scripts', 15 );
@@ -668,6 +672,40 @@ add_filter( 'astra_woo_header_cart_total', 'custom_cart_total' );
 function custom_cart_total() {
 	echo count( WC()->cart->get_cart() );
 }
+
+
+// ****************************************************************************
+// *************** LIVE PRICE / AMOUNT DISPLAY ON PRODUCT PAGE ****************
+// ****************************************************************************
+
+function action_wc_live_product_total() {
+	global $product;
+	
+	$sell_by_weight = $product->get_meta('sell_by_weight');
+	$weight_measure = $product->get_meta('sell_weight_measure');
+	$sold_by_unit = '';
+	// Important: The product price in case of weight is by Kg.
+	$price_num = $product->price;
+
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		$price_num = convert_price_from_kg_to_g($price_num, $weight_measure);
+		$amount = $weight_measure;
+		$sold_by_unit = get_option('woocommerce_weight_unit');
+	} else {
+		$amount = '1';
+		$sold_by_unit = 'ud';
+	}
+
+	// If there is only one in stock and is not variable the number input is not displayed so neither this should be displayed.
+	$visible = '';
+	if ( !$product->is_type( 'variable' ) && $product->stock_quantity <= 1) { 
+		$visible = 'display:none;';
+	}
+
+	echo '<div class="product_total" style="' . $visible . 'order:1;"><span id="total_product_price" data-initial-price="' . $price_num . '"></span>&nbsp;' . get_woocommerce_currency_symbol() . ' /&nbsp;<span id="total_product_amount" data-initial-amount="' . $amount . '"></span>&nbsp;' . $sold_by_unit . '</div>';
+};
+
+add_action( 'woocommerce_before_add_to_cart_button', 'action_wc_live_product_total', 10, 0 );
 
 
 // ****************************************************************************

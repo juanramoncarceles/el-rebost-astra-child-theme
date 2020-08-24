@@ -1,5 +1,4 @@
 ToDos:
-  ☐ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high
   ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @high 
   ☐ Hacer que sea una web multilanguage. Entender la función __() y ver si la mejor opción es algún plugin como WMPL. @high 
     https://docs.woocommerce.com/document/woocommerce-localization/
@@ -16,6 +15,7 @@ Notas:
 
 
 Hecho:
+  ✔ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high @done(20-08-24 19:30)
   ✔ El precio de los productos que se venden por peso es en Kg asi que hay que calcular el correspondiente en gramos. @critical @done(20-08-16 22:43)
   ✔ Poner en dos columnas los contenidos de la pestaña "alimentació" ya que es demasiado larga. @done(20-08-16 22:43)
   ✔ Poner antes la pestaña de información adicional que la de valores nutricionales. @done(20-08-16 22:41)

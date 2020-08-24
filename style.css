@@ -86,3 +86,25 @@ body.ast-theme-transparent-header .main-header-bar.sticky-active {
 .widget_cart_quantity_container > .subtotal {
   text-align: center;
 }
+
+/******************** PRODUCT PAGE REALTIME PRICE / AMOUNT *******************/
+
+/* Added to the existing form */
+body.single-product form.cart:not(.variations_form), /* only for simple product */
+body.single-product form.variations_form .woocommerce-variation-add-to-cart /* only for variable product */
+{
+  display: flex;
+}
+
+body.single-product form.cart button.single_add_to_cart_button {
+  order: 2;
+}
+
+body.single-product form.cart .product_total {
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  margin-left: 6px;
+}
