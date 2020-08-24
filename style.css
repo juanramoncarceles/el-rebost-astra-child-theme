@@ -96,6 +96,11 @@ body.single-product form.variations_form .woocommerce-variation-add-to-cart /* o
   display: flex;
 }
 
+/* In case the plus/minus buttons are added by the theme remove the default margin bottom since now I added to the container display:flex */
+.woocommerce .product .cart .quantity.buttons_added {
+  margin-bottom: 0 !important;
+}
+
 body.single-product form.cart button.single_add_to_cart_button {
   order: 2;
 }

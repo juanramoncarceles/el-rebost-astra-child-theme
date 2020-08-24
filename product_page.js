@@ -71,10 +71,29 @@
     });
   }
 
-  // Listens for the quantity input to change and updates de values for price and amount.
-  qty_input.addEventListener('input', e => {
-    const real_time_qty = e.target.value;
+  function updateDisplayedPriceAndAmount() {
+    const real_time_qty = qty_input.value;
     totalProductPrice.textContent = formatPrice(totalProductPrice.dataset.initialPrice * real_time_qty);
     totalProductAmount.textContent = totalProductAmount.dataset.initialAmount * real_time_qty;
+  }
+
+  // Listens for the quantity input to change and updates de values for price and amount.
+  qty_input.addEventListener('input', () => {
+    updateDisplayedPriceAndAmount();
   });
+
+  // Changing theme options the <input> can include two buttons to change the value, which are added by the theme in delay.
+  setTimeout(() => {
+    const plusBtn = document.querySelector('form.cart div.quantity > a.plus');
+    const minusBtn = document.querySelector('form.cart div.quantity > a.minus');
+    // In case the buttons to change the value exist add event listeners to them.
+    if (plusBtn !== null && minusBtn !== null) {
+      plusBtn.addEventListener('click', () => {
+        updateDisplayedPriceAndAmount();
+      });
+      minusBtn.addEventListener('click', () => {
+        updateDisplayedPriceAndAmount();
+      });
+    }
+  }, 2000);
 })()
