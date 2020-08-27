@@ -1,4 +1,9 @@
 ToDos:
+  ☐ Poner en negrita el live price / amount de la página de producto.
+
+  ☐ Hay productos que no se envian y hay que indicar que hay que pasarlos a recoger. Hacerlo como si fuese un producto virtual y añadir una nota de compra indicandolo?
+    Al hacer click en el botón de ir a pagar que salga un aviso de que los productos que no se envian se quitarán de la compra.
+  ☐ Usar algún hook del carrito para indicar explícitamente que el envío es gratuito a ciertas poblaciones o a partir de 80 €.
   ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @high 
   ☐ Hacer que sea una web multilanguage. Entender la función __() y ver si la mejor opción es algún plugin como WMPL. @high 
     https://docs.woocommerce.com/document/woocommerce-localization/
@@ -9,12 +14,14 @@ ToDos:
   ☐ Indentar las dos filas de la tabla de valores nutricionales (Grasas satuaradas y azúcares). @low 
   ☐ Mirar si se puede hacer que las páginas de las categorias (por ejemplo 'algas') no tengan en la url el fragmento /categoria/.
 
-  
+
 Notas:
   ☐ Plugin "Price per Unit Pro" / "Woocommerce Measurement Price Calculator" ?
 
 
 Hecho:
+  ✔ Activar solo la opción de envío a domicilio si el importe es mayor de 25€. @done(20-08-27 20:57)
+  ✔ Añadir que el envío cuesta 5,95 €, y es gratis si pasa de 80 € o si es a ciertos municipios. @done(20-08-26 20:27)
   ✔ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high @done(20-08-24 19:30)
   ✔ El precio de los productos que se venden por peso es en Kg asi que hay que calcular el correspondiente en gramos. @critical @done(20-08-16 22:43)
   ✔ Poner en dos columnas los contenidos de la pestaña "alimentació" ya que es demasiado larga. @done(20-08-16 22:43)
