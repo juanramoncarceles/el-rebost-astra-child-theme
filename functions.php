@@ -602,11 +602,11 @@ function wc_recalc_prices_by_weight( $cart_object ) {
 		$sell_by_weight = get_post_meta( $product_id, 'sell_by_weight', true );
 		$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
 		if ($sell_by_weight == "yes" && $weight_measure != "") {
-			$price = $cart_item['data']->get_price(); // If this doesn't work take the original price form the product: $price_num = wc_get_product( $product_id )->get_price();
+			$price_num = wc_get_product( $product_id )->get_price();
 			if ($weight_measure == '100') {
-				$cart_item['data']->set_price( $price / 10 );
+				$cart_item['data']->set_price( $price_num / 10 );
 			} else if ($weight_measure == '50') {
-				$cart_item['data']->set_price( $price / 20 );
+				$cart_item['data']->set_price( $price_num / 20 );
 			}
 		}
 	}
