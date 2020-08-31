@@ -1,10 +1,16 @@
-ToDos:
+PRIORITY:
+  ☐ En la página del checkout también hay que repetir el aviso de que el envío está disponible solo para compras de como mínimo 25 €. @high
+    Como ya estoy editando la plantilla "cart-shipping.php" que es la misma del carrito, puedo poner dentro la logica para que se muestre.
+  ☐ Hay que añadir más datos sobre la entrega a domicilio gratuita a ciertos municipios ya que la entrega se realiza solo los viernes. Si se quiere antes hay que elegir envío de pago.
   ☐ Poner en negrita el live price / amount de la página de producto.
-
+  ☐ En la página de checkout añadir en la zona de envío si conviene un mensaje que ponga: @high 
+    Recorda que tens productes que s'han de passar a recollir per la botiga, si vols modificar la comanda fes clic aquí per tornar a la cistella.
   ☐ Hay productos que no se envian y hay que indicar que hay que pasarlos a recoger. Hacerlo como si fuese un producto virtual y añadir una nota de compra indicandolo?
     Al hacer click en el botón de ir a pagar que salga un aviso de que los productos que no se envian se quitarán de la compra.
   ☐ Usar algún hook del carrito para indicar explícitamente que el envío es gratuito a ciertas poblaciones o a partir de 80 €.
-  ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @high 
+
+OTHER:
+  ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @low 
   ☐ Hacer que sea una web multilanguage. Entender la función __() y ver si la mejor opción es algún plugin como WMPL. @high 
     https://docs.woocommerce.com/document/woocommerce-localization/
     https://betterstudio.com/blog/change-woocommerce-language/
@@ -20,6 +26,9 @@ Notas:
 
 
 Hecho:
+  ✔ En la página del carrito si el usuario tiene productos que no se pueden enviar y elige la opción envío tiene que salir un aviso. @done(20-09-01 00:11)
+    Contenido aprox del aviso: Tienes productos que no se envian y has elegido envío, si procedes se eliminarán, sino cambia a recoger en tienda.
+  ✔ Si alguien entra directamente en la página de checkout y hay productos que no se envian tiene que existir solo la opción recoger en tienda con un mensaje del motivo. @done(20-09-01 00:08)
   ✔ Activar solo la opción de envío a domicilio si el importe es mayor de 25€. @done(20-08-27 20:57)
   ✔ Añadir que el envío cuesta 5,95 €, y es gratis si pasa de 80 € o si es a ciertos municipios. @done(20-08-26 20:27)
   ✔ Mirar la web de Unpacked para añadir en la página de producto un elemento que muestra el precio final por producto y que se actualiza en vivo mediante JS. @high @done(20-08-24 19:30)
@@ -28,8 +37,3 @@ Hecho:
   ✔ Poner antes la pestaña de información adicional que la de valores nutricionales. @done(20-08-16 22:41)
   ✔ Poner la fuente "Raleway". @done(20-08-21 12:43)
   ✔ La información adicional se ha de poder introducir como HTML con el objetivo de poder indicar una mínima estructura y estilo. @done(20-08-21 12:43)
-  
-
-
-Temas para comentar:
-  ☐ Explicar como pueden cambiar las tipografias para hacer varias pruebas. (Apariencia > ...)
