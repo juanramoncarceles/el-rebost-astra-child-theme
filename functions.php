@@ -22,6 +22,10 @@ function enqueue_custom_styles_and_scripts() {
 
 	// wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
 
+	if ( is_cart() ) {
+		wp_enqueue_script( 'cart-page-el-rebost', get_stylesheet_directory_uri() . '/js/cart_page.js', false, '1.0.0', true );
+	}
+
 	if (is_product()) {
 		wp_enqueue_script( 'product-page-el-rebost', get_stylesheet_directory_uri() . '/product_page.js', false, '1.0.0', true );
 	}
@@ -706,6 +710,157 @@ function action_wc_live_product_total() {
 };
 
 add_action( 'woocommerce_before_add_to_cart_button', 'action_wc_live_product_total', 10, 0 );
+
+
+// ****************************************************************************
+// **** MESSAGES ON SHIPPING AREA TO ADD EXTRA INFO DEPENDING ON CONDITIONS ***
+// ****************************************************************************
+
+// Show a message depending on the total amount and the shipping methods avaialble.
+function action_woocommerce_after_shipping_calculator() {
+	$total_price = WC()->cart->total;
+	// Get the customer post code.
+	//echo WC()->customer->get_shipping_postcode();
+	// Get the shipping methods.
+	//print_r(WC()->shipping->get_shipping_methods());
+	// Get the packages.
+	//print_r(WC()->shipping()->get_packages());
+	// Get the available shipping methods for the first package. TODO first package hard coded is not a good idea.
+	$available_methods = WC()->shipping()->get_packages()[0]['rates'];
+	
+	$local_pickup = 0;
+	$flat_rate = 0;
+	$free_shipping = 0;
+	
+	// Loop the array and count how many of each type there are.
+	array_walk($available_methods, function($item) use(&$local_pickup, &$flat_rate, &$free_shipping) {
+		if (strpos($item->id, 'local_pickup') !== false) {
+			$local_pickup++;
+		} else if (strpos($item->id, 'flat_rate') !== false || strpos($item->id, 'jem_table_rate') !== false) {
+			$flat_rate++;
+		} else if (strpos($item->id, 'free_shipping') !== false) {
+			$free_shipping++;
+		}
+	});
+
+	$message = '';
+	
+	// Choose the message based on the available methods.
+	if ($local_pickup > 0 && $flat_rate == 0 && $free_shipping == 0) {
+		$message = "<span style=\"font-weight:bold;\">L'enviament a domicili está disponible només amb una compra mínima de 25€.</span>"; // TODO Esto ya no aparece nunca.
+	} else if ($flat_rate > 0 && $free_shipping == 0) {
+		$message = "<span>L'enviament és gratuït a partir de 80€ i també a Sant Feliu de Llobregat, Sant Joan Despí, Sant Just Desvern i Molins de Rei a partir de 25€.</span>";
+	}
+
+	if ($message !== '') {
+		echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\">" . $message . "</div>";
+	}
+
+	// This is an alternative that uses hardcoded price values instead.
+	// if ($total_price < 25) {
+	// 	echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\"><span>L'enviament a domicili está disponible només amb una compra de com a mínim 25€.</span></div>";
+	// } else if ($total_price >= 25 && $total_price < 80) {
+	// 	echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\"><span>L'enviament es gratuït a partir de 80€ i també als seguents municipis....</span></div>";
+	// }
+};
+
+add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_shipping_calculator', 10, 0 ); 
+
+
+// ****************************************************************************
+// ************** ADDITIONAL INFO TEXT FOR EACH SHIPPING METHOD ***************
+// ****************************************************************************
+
+// Adds a custom field to each shipping method using a filter at woocommerce start.
+add_action('woocommerce_init', 'shipping_instance_form_fields_filters');
+
+function shipping_instance_form_fields_filters() {
+  $shipping_methods = WC()->shipping->get_shipping_methods();
+	foreach($shipping_methods as $shipping_method) {
+    add_filter('woocommerce_shipping_instance_form_fields_' . $shipping_method->id, 'shipping_instance_form_add_extra_fields', 10, 1);
+  }
+}
+
+function shipping_instance_form_add_extra_fields( $settings ) {
+  $settings['shipping_custom_field_for_display'] = [ // TODO cambiar el nombre del campo para que sea mas concreto
+    'title'       => 'Información extra para mostrar',
+    'type'        => 'text', 
+		'placeholder' => 'Entrega solo los lunes...',
+		'desc_tip'		=> true,
+    'description' => 'Añade información extra que puede resultar útil en relación al método de envío. Se muestra bajo el título del método de envío en la página del carrito y de pago.'
+  ];
+
+  return $settings;
+}
+
+// Shows custom data stored for shipping methods under its label in the cart and checkout pages.
+function action_show_custom_shipping_method_data( $method, $package_index ) {
+	$formatted_method_id = $method->method_id . "_" . $method->instance_id;
+	$text = get_option('woocommerce_' . $formatted_method_id . '_settings')['shipping_custom_field_for_display'];
+	if ( !empty( $text ) ) {
+		echo "<br><span style=\"color:#df6565;font-weight:bold;\">" . __( $text ) . "</span>";
+	}
+}
+
+add_action( 'woocommerce_after_shipping_rate', 'action_show_custom_shipping_method_data', 10, 2 );
+
+
+// ****************************************************************************
+// ********* ADDITIONAL MESSAGES FOR PRODUCTS ON PRODUCT PAGE & CART **********
+// ****************************************************************************
+
+// TODO Make the message available to set from the WC admin UI.
+// TODO Set there a color picker to choose the color and maybe bold.
+
+// Add a info text on the cart item title indicating that the product is only for local pickup.
+function action_after_cart_item_title( $cart_item, $cart_item_key ) {
+	$custom_product_message = 'Aquest producte s\'ha de passar a recollir a la botiga!.';
+	if ($cart_item['data']->get_shipping_class() == 'no-shipping') {
+		echo "<small style=\"display:block;\">" . $custom_product_message . "</small>";
+	}
+};
+
+add_action( 'woocommerce_after_cart_item_name', 'action_after_cart_item_title', 10, 2 ); 
+
+
+// Add a info text on the product page indicating that the product is only for local pickup.
+function action_add_no_shipping_waring() {
+	global $product;
+	$custom_product_message = 'Aquest producte s\'ha de passar a recollir a la botiga!.';
+	if ($product->get_shipping_class() == 'no-shipping') {
+		echo "<small style=\"display:block;color:#db4d4d;font-weight:bold;\">" . $custom_product_message . "</small>";
+	}
+}
+
+add_action('woocommerce_single_product_summary', 'action_add_no_shipping_waring', 25);
+
+
+// ****************************************************************************
+// ******* ACTION OF REMOVING NO SHIPPING PRODUCTS IF URL PARAM IS SET ********
+// ****************************************************************************
+
+// Register a custom url query parameter to use it later.
+function add_get_val() {
+	global $wp;
+	$wp->add_query_var('remove_noshipping_items');
+}
+add_action('init', 'add_get_val');
+
+
+// Runs at the beginning of the checkout page to remove items with no shipping if the query parameter is set in the url.
+function remove_no_shipping_items_if_param_exists() {
+	$remove_noshipping_items = get_query_var('remove_noshipping_items');
+	//$remove_noshipping_items = $_GET['remove_noshipping_items']; /* This would also work but is not recommended. */
+	if ($remove_noshipping_items === 'true') {
+		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+			if ( $cart_item['data']->get_shipping_class() == 'no-shipping' ) {
+				WC()->cart->remove_cart_item( $cart_item_key );
+			}
+ 		}
+	}
+}
+
+add_action('woocommerce_before_checkout_form', 'remove_no_shipping_items_if_param_exists');
 
 
 // ****************************************************************************
