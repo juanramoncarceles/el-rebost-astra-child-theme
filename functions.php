@@ -413,7 +413,7 @@ function woo_nutrition_tab_content() {
 	}
 
 	if (array_key_exists('saturated_fats', $nutrition_facts)) {
-		$nutrition_table_rows .= create_table_row( __( 'Greixos saturats', 'woocommerce' ), $nutrition_facts['saturated_fats'] );
+		$nutrition_table_rows .= create_table_row( __( 'dels quals saturats', 'woocommerce' ), $nutrition_facts['saturated_fats'], 'sub-item' );
 	}
 
 	if (array_key_exists('carbs', $nutrition_facts)) {
@@ -421,7 +421,7 @@ function woo_nutrition_tab_content() {
 	}
 
 	if (array_key_exists('sugar', $nutrition_facts)) {
-		$nutrition_table_rows .= create_table_row( __( 'Sucres', 'woocommerce' ), $nutrition_facts['sugar'] );
+		$nutrition_table_rows .= create_table_row( __( 'dels quals sucres', 'woocommerce' ), $nutrition_facts['sugar'], 'sub-item' );
 	}
 
 	if (array_key_exists('fiber', $nutrition_facts)) {
@@ -443,9 +443,13 @@ function woo_nutrition_tab_content() {
 
 }
 
-function create_table_row( $label, $value) {
+/**
+ * Creates a string that corresponds to the HTML of a row in a table.
+ * @param $custom_class (Optional) A class to be added to the 'th' element of the row.
+ */
+function create_table_row( $label, $value, $custom_class = '') {
 	$table_rows = '<tr class="woocommerce-product-attributes-item">';
-	$table_rows .= '<th class="woocommerce-product-attributes-item__label">' . $label . '</th>';
+	$table_rows .= '<th class="woocommerce-product-attributes-item__label ' . ($custom_class ?: '') . '">' . $label . '</th>';
 	$table_rows .= '<td class="woocommerce-product-attributes-item__value"><p>' . $value . '</p></td>';
 	$table_rows .= '</tr>';
 	return $table_rows;
@@ -764,7 +768,7 @@ function action_woocommerce_after_shipping_calculator() {
 	// }
 };
 
-add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_shipping_calculator', 10, 0 ); 
+// add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_shipping_calculator', 10, 0 ); 
 
 
 // ****************************************************************************
@@ -782,7 +786,7 @@ function shipping_instance_form_fields_filters() {
 }
 
 function shipping_instance_form_add_extra_fields( $settings ) {
-  $settings['shipping_custom_field_for_display'] = [ // TODO cambiar el nombre del campo para que sea mas concreto
+  $settings['shipping_custom_field_for_display'] = [
     'title'       => 'Información extra para mostrar',
     'type'        => 'text', 
 		'placeholder' => 'Entrega solo los lunes...',
@@ -798,11 +802,37 @@ function action_show_custom_shipping_method_data( $method, $package_index ) {
 	$formatted_method_id = $method->method_id . "_" . $method->instance_id;
 	$text = get_option('woocommerce_' . $formatted_method_id . '_settings')['shipping_custom_field_for_display'];
 	if ( !empty( $text ) ) {
-		echo "<br><span style=\"color:#df6565;font-weight:bold;\">" . __( $text ) . "</span>";
+		// TODO add another text field to input a color as string to be used to style the text.
+		echo "<br><small>" . __( $text ) . "</small>";
 	}
 }
 
 add_action( 'woocommerce_after_shipping_rate', 'action_show_custom_shipping_method_data', 10, 2 );
+
+
+// ****************************************************************************
+// ****** HIDE OTHER SHIPPING METHODS WHEN "FREE SHIPPING" IS AVAILABLE *******
+// ****************************************************************************
+
+/**
+ * Hide shipping rates when free shipping is available.
+ * Updated to show also local pickup options.
+ *
+ * @see https://docs.woocommerce.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
+ * @param array $rates Array of rates found for the package.
+ * @return array
+ */
+function my_hide_shipping_when_free_is_available( $rates ) {
+	$free_and_local = array();
+	foreach ( $rates as $rate_id => $rate ) {
+		if ( 'free_shipping' === $rate->method_id || 'local_pickup' === $rate->method_id ) {
+			$free_and_local[ $rate_id ] = $rate;
+		}
+	}
+	return ! empty( $free_and_local ) ? $free_and_local : $rates;
+}
+
+// add_filter( 'woocommerce_package_rates', 'my_hide_shipping_when_free_is_available', 100 );
 
 
 // ****************************************************************************
