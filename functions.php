@@ -710,7 +710,7 @@ function action_wc_live_product_total() {
 		$visible = 'display:none;';
 	}
 
-	echo '<div class="product_total" style="' . $visible . 'order:1;"><span id="total_product_price" data-initial-price="' . $price_num . '"></span>&nbsp;' . get_woocommerce_currency_symbol() . ' /&nbsp;<span id="total_product_amount" data-initial-amount="' . $amount . '"></span>&nbsp;' . $sold_by_unit . '</div>';
+	echo '<div class="product_total" style="' . $visible . 'order:1;font-weight:bold;"><span id="total_product_price" data-initial-price="' . $price_num . '"></span>&nbsp;' . get_woocommerce_currency_symbol() . ' /&nbsp;<span id="total_product_amount" data-initial-amount="' . $amount . '"></span>&nbsp;' . $sold_by_unit . '</div>';
 };
 
 add_action( 'woocommerce_before_add_to_cart_button', 'action_wc_live_product_total', 10, 0 );
