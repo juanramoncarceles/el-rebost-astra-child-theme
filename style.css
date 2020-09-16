@@ -13,18 +13,19 @@ Template: astra
 
 /************************** MAIN MENU SUBMENU LIST ***************************/
 
-ul.sub-menu {
+.main-header-menu .sub-menu {
   display: flex;
+  width: 300px;
   flex-wrap: wrap;
 }
 
-ul.sub-menu > li {
+.main-header-menu .sub-menu > li {
   width: 50%;
 }
 
-.main-header-menu .sub-menu {
+/* .main-header-menu .sub-menu {
   width: 300px;
-}
+} */
 
 /************************* MAIN MENU ITEMS FONT SIZE *************************/
 /*
@@ -112,4 +113,20 @@ body.single-product form.cart .product_total {
   justify-content: center;
   margin-right: 8px;
   margin-left: 6px;
+}
+
+/********************* POSITION OF THE SCROLL TO TOP ICON ********************/
+
+a.ast-scroll-top-icon {
+  bottom: 50px;
+}
+
+/*************************** NUTRITION FACTS TABLE ***************************/
+
+.woocommerce table.shop_attributes th {
+  width: 190px;
+}
+
+.woocommerce div.product .woocommerce-tabs .shop_attributes th.sub-item {
+  padding-left: 2em;
 }
