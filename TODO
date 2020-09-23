@@ -1,8 +1,15 @@
 PRIORITY:
+  ☐ Error en el precio en tiempo real en la pagina de producto cuando el producto es variable y se vende por peso.
+  ☐ Hacer que los mensajes de producto no enviable de la página de producto y del carrito sean personalizables por ellos desde el panel de WooCommerce. @high 
+  ☐ Hacer que los productos relacionados correspondan a subcategorias en vez de categorias.
+    https://stackoverflow.com/questions/26316952/woocommerce-only-show-related-products-from-same-subcategory
+    A lo mejor modificar estos
+      wc-template-hooks.php --> add_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
+      wc-template-functions.php --> woocommerce_output_related_products()
+
   ☐ En la página del checkout también hay que repetir el aviso de que el envío está disponible solo para compras de como mínimo 25 €. @high
     Como ya estoy editando la plantilla "cart-shipping.php" que es la misma del carrito, puedo poner dentro la logica para que se muestre.
-  ☐ Hay que añadir más datos sobre la entrega a domicilio gratuita a ciertos municipios ya que la entrega se realiza solo los viernes. Si se quiere antes hay que elegir envío de pago.
-  ☐ Poner en negrita el live price / amount de la página de producto.
+  ☐ Hay que añadir más datos sobre la entrega a domicilio gratuita a ciertos municipios ya que la entrega se realiza solo un dia a la semana. Si se quiere antes hay que elegir envío de pago.
   ☐ En la página de checkout añadir en la zona de envío si conviene un mensaje que ponga: @high 
     Recorda que tens productes que s'han de passar a recollir per la botiga, si vols modificar la comanda fes clic aquí per tornar a la cistella.
   ☐ Hay productos que no se envian y hay que indicar que hay que pasarlos a recoger. Hacerlo como si fuese un producto virtual y añadir una nota de compra indicandolo?
@@ -28,6 +35,13 @@ Notas:
 
 
 Hecho:
+  ✔ Hacer que los productos no enviables, sean solo enviables a los municipios gratuitos (Sant Feliu, Sant Just...). @high @done(20-09-23 23:00)
+    Hay que modificar la logica del archivo "proceed-to-checkout-button.php"
+    Añadir la opción Is_home_delivery en los métodos de envío para poder indicar si hay que permitir pasar al checkout o no.
+    Tengo que hacer que lleve a la página de checkout no solo con la opción de recollida botiga sino también con la de entrega a domicili.
+    Tiene que solo permitir pasar si se ha marcado "local pickup" o "home delivery".
+    También habrá que modificar el mensaje de alerta que aparece en el botón diciendo que se eliminará el producto/s si no se elige una de las opciones: recollida local o envio domicilio.
+  ✔ Poner en negrita el live price / amount de la página de producto. @done(20-09-20 10:20)
   ✔ En la página del carrito si el usuario tiene productos que no se pueden enviar y elige la opción envío tiene que salir un aviso. @done(20-09-01 00:11)
     Contenido aprox del aviso: Tienes productos que no se envian y has elegido envío, si procedes se eliminarán, sino cambia a recoger en tienda.
   ✔ Si alguien entra directamente en la página de checkout y hay productos que no se envian tiene que existir solo la opción recoger en tienda con un mensaje del motivo. @done(20-09-01 00:08)

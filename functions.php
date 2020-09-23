@@ -11,7 +11,7 @@
 /**
  * Define Constants
  */
-define( 'CHILD_THEME_ASTRA_CHILD_EL_REBOST_VERSION', '1.0.0' );
+define( 'CHILD_THEME_ASTRA_CHILD_EL_REBOST_VERSION', '1.0.1' );
 
 /**
  * Enqueue styles
@@ -772,7 +772,7 @@ function action_woocommerce_after_shipping_calculator() {
 
 
 // ****************************************************************************
-// ************** ADDITIONAL INFO TEXT FOR EACH SHIPPING METHOD ***************
+// ******** ADDITIONAL CUSTOM FIELDS ON THE SHIPPING METHOD SETTINGS **********
 // ****************************************************************************
 
 // Adds a custom field to each shipping method using a filter at woocommerce start.
@@ -785,6 +785,7 @@ function shipping_instance_form_fields_filters() {
   }
 }
 
+// Field to save a custom text for the shipping method that can be displayed later on.
 function shipping_instance_form_add_extra_fields( $settings ) {
   $settings['shipping_custom_field_for_display'] = [
     'title'       => 'Información extra para mostrar',
@@ -792,10 +793,24 @@ function shipping_instance_form_add_extra_fields( $settings ) {
 		'placeholder' => 'Entrega solo los lunes...',
 		'desc_tip'		=> true,
     'description' => 'Añade información extra que puede resultar útil en relación al método de envío. Se muestra bajo el título del método de envío en la página del carrito y de pago.'
-  ];
+	];
+	
+	// Field to indicate if it is a method for home delivery / entrega a domicilio.
+	$settings['shipping_custom_field_is_home_delivery'] = [
+		'title'       => 'Es entrega a domicilio',
+		'label'       => 'Entrega a domicilio a ciertos municipios.',
+		'type'        => 'checkbox',
+		'desc_tip'    => true,
+		'description' => 'Marcar si se trata del método de envío de entrega a domicilio solo para ciertos municipios.'
+	];
 
   return $settings;
 }
+
+
+// ****************************************************************************
+// ** DISPLAY THE TEXT ADDED TO THE SHIPPING METHOD ON CART & CHECKOUT PAGES **
+// ****************************************************************************
 
 // Shows custom data stored for shipping methods under its label in the cart and checkout pages.
 function action_show_custom_shipping_method_data( $method, $package_index ) {
@@ -844,7 +859,7 @@ function my_hide_shipping_when_free_is_available( $rates ) {
 
 // Add a info text on the cart item title indicating that the product is only for local pickup.
 function action_after_cart_item_title( $cart_item, $cart_item_key ) {
-	$custom_product_message = 'Aquest producte s\'ha de passar a recollir a la botiga!.';
+	$custom_product_message = 'Aquest producte no s\'envia.';
 	if ($cart_item['data']->get_shipping_class() == 'no-shipping') {
 		echo "<small style=\"display:block;\">" . $custom_product_message . "</small>";
 	}
@@ -856,13 +871,13 @@ add_action( 'woocommerce_after_cart_item_name', 'action_after_cart_item_title', 
 // Add a info text on the product page indicating that the product is only for local pickup.
 function action_add_no_shipping_waring() {
 	global $product;
-	$custom_product_message = 'Aquest producte s\'ha de passar a recollir a la botiga!.';
+	$custom_product_message = 'Aquest producte no s\'envia. Només està disponible per l\'opció d\'entrega a domicili (Sant Feliu de Llobregat, Molins de Rei, Sant Just Desvern, Sant Joan Despí) o bé per recollir a la botiga.';
 	if ($product->get_shipping_class() == 'no-shipping') {
-		echo "<small style=\"display:block;color:#db4d4d;font-weight:bold;\">" . $custom_product_message . "</small>";
+		echo "<p style=\"background-color:#f7f6f7;padding:10px;font-weight:bold;\">" . $custom_product_message . "</p>";
 	}
 }
 
-add_action('woocommerce_single_product_summary', 'action_add_no_shipping_waring', 25);
+add_action('woocommerce_single_product_summary', 'action_add_no_shipping_waring', 15);
 
 
 // ****************************************************************************

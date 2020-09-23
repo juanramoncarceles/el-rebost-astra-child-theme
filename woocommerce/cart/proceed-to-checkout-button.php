@@ -35,28 +35,31 @@ foreach ($cart_items as $cart_item => $values) {
 	}
 }
 
-$selected_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+$selected_shipping_methods_ids = WC()->session->get( 'chosen_shipping_methods' );
 
-$are_all_selected_methods_localpickup = true;
+$are_all_selected_methods_localpickup_or_home_delivery = true;
 
-// If all in the array are 'local_pickup' then nothing will happen.
-array_walk($selected_shipping_methods, function($shipping_methods) use(&$are_all_selected_methods_localpickup) {
-	if (strpos($shipping_methods, 'local_pickup') === false) {
-		$are_all_selected_methods_localpickup = false;
-	}
-});
+// Only run if there is at least one product with no-shipping, otherwise there is no need to check the shipping methods.
+if (count($no_shipping_products) > 0) {
+	// If all in the array are not 'local_pickup' neither 'home delivery' then nothing will happen.
+	array_walk($selected_shipping_methods_ids, function($method_id) use(&$are_all_selected_methods_localpickup_or_home_delivery) {
+		if (strpos($method_id, 'local_pickup') === false && get_option('woocommerce_' . str_replace(":", "_", $method_id) . '_settings')['shipping_custom_field_is_home_delivery'] !== "yes") {
+			$are_all_selected_methods_localpickup_or_home_delivery = false;
+		}
+	});
+}
 
 ?>
 
-<?php if (count($no_shipping_products) > 0 && !$are_all_selected_methods_localpickup) : /* Show the fake button that will trigger the message. */ ?>
+<?php if (count($no_shipping_products) > 0 && !$are_all_selected_methods_localpickup_or_home_delivery) : /* Show the fake button that will trigger the message. */ ?>
 
 	<div id="no_shipping_message_alert" style="display:none;background-color:rgb(225,225,225);padding:15px;margin-bottom:20px;font-weight:bold;">
 		<?php
-			echo "<p>INFORMACIÓ IMPORTANT!<br/>Els següents productes NO es poden enviar i has triat un tipus d'enviament a domicili, si continues s'eliminaran.</p><ul>";
+			echo "<p>INFORMACIÓ IMPORTANT!<br/>Els següents productes només estan disponibles per recollida a la botiga o per entrega a domicili als següents municipis: St. Feliu de Llobregat, Molins de Rei, St. Joan Despí i St. Just Desvern. Si continues s'eliminaran de la cistella.</p><ul>";
 			foreach ($no_shipping_products as $product) {
 				echo '<li>' . $product . '</li>';
 			}
-			echo "</ul><p>Si vols procedir amb tots els productes tria l'opció \"Recollida local\". Sino fes clic abaix per continuar sense els productes que no es poden enviar.</p>";
+			echo "</ul><p>Si vols procedir amb tots els productes tria l'opció \"Recollida botiga\" o \"Entrega a domicili\". Sino fes clic abaix per continuar sense aquests productes.</p>";
 		?>
 	</div>
 
@@ -65,7 +68,7 @@ array_walk($selected_shipping_methods, function($shipping_methods) use(&$are_all
 	</a>
 
 	<a id="checkout_custom_btn_without_noshipping_products" style="display:none;" href="<?php echo esc_url( wc_get_checkout_url() ) . '?remove_noshipping_items=true'; ?>" class="checkout-button button alt wc-forward">
-		Continuar sense els productes que no s'envien
+		Continuar sense els productes esmentats
 	</a>
 
 <?php else: /* Show the default WC button */ ?>

@@ -130,3 +130,13 @@ a.ast-scroll-top-icon {
 .woocommerce div.product .woocommerce-tabs .shop_attributes th.sub-item {
   padding-left: 2em;
 }
+
+/************************ SIDE MENU ON CATEGORY PAGES ************************/
+
+.elementor-widget-wp-widget-nav_menu ul {
+  list-style-type: none;
+}
+
+.elementor-widget-wp-widget-nav_menu ul.menu > li > a {
+  font-weight: bold;
+}
