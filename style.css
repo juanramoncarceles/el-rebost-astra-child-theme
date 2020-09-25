@@ -140,3 +140,9 @@ a.ast-scroll-top-icon {
 .elementor-widget-wp-widget-nav_menu ul.menu > li > a {
   font-weight: bold;
 }
+
+/****** FOR THE SHIPPING METHOD OPTIONS IN THE CART AND CHECKOUT PAGES *******/
+
+ul.woocommerce-shipping-methods > li {
+  line-height: 1.2rem;
+}
