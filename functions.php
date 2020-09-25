@@ -859,13 +859,15 @@ function my_hide_shipping_when_free_is_available( $rates ) {
 
 // Add a info text on the cart item title indicating that the product is only for local pickup.
 function action_after_cart_item_title( $cart_item, $cart_item_key ) {
-	$custom_product_message = 'Aquest producte no s\'envia.';
+	$slug_pag_modalitats_de_compra = get_permalink(5778); // The id of the page "modalitats de compra". (In my local WP is 4135)
+	$text_to_modalitats_de_compra = $slug_pag_modalitats_de_compra ? "<a href=\"" . $slug_pag_modalitats_de_compra . "\" target=\"_blank\">recollida a botiga i entrega a domicili</a>" : "recollida a botiga i entrega a domicili";
+	$custom_product_message = "Només disponible per " . $text_to_modalitats_de_compra;
 	if ($cart_item['data']->get_shipping_class() == 'no-shipping') {
 		echo "<small style=\"display:block;\">" . $custom_product_message . "</small>";
 	}
 };
 
-add_action( 'woocommerce_after_cart_item_name', 'action_after_cart_item_title', 10, 2 ); 
+add_action( 'woocommerce_after_cart_item_name', 'action_after_cart_item_title', 10, 2 );
 
 
 // Add a info text on the product page indicating that the product is only for local pickup.
