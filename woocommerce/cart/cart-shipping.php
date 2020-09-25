@@ -31,10 +31,10 @@ $calculator_text          = '';
 
 			<?php /* PHP block added by El Rebost */
 
-			// If page is not cart and there is at least one product with no shipping only create the local pickup option and show a message indicating
-			// that there is no shipping because there are products that cannot be shipped, to change the order click a link to go to the cart.
+			// If page is not cart and there is at least one product with no-shipping only create the "local pickup" and "home delivery" options and show a message indicating
+			// that the reason is that there are some products that are only available for this kind of shipping methods, to change the order click a link to go to the cart.
 
-			$only_local_pickup_enabled = false;
+			$only_local_pickup_and_home_delivery_enabled = false;
 
 			if ( !is_cart() ) {
 				$cart_items = WC()->cart->get_cart();
@@ -58,27 +58,31 @@ $calculator_text          = '';
 							}
 						}
 					}
-					// Print the HTML list but removing any method that is not local pickup.
+					// Print the HTML list but removing any method that is not local pickup or home delivery.
 					echo "<ul id=\"shipping_method\" class=\"woocommerce-shipping-methods\">";
 					// TODO If there is only one and it is local pickup means that the order is less than 25€
 					// TODO If only one is being left it would be better to have the <input type="hidden">.
 					foreach ( $available_methods as $method ) {
-						if ( strpos($method->id, 'local_pickup') !== false ) {
+						if ( strpos($method->id, 'local_pickup') !== false || get_option('woocommerce_' . str_replace(":", "_", $method->id) . '_settings')['shipping_custom_field_is_home_delivery'] === "yes") {
 							echo "<li>";
 							printf( '<input type="radio" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" %4$s />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ), checked( $method->id, $chosen_method, false ) ); // WPCS: XSS ok.
 							printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
+							do_action( 'woocommerce_after_shipping_rate', $method, $index );
 							echo "</li>";
 						}
 					}
 					echo "</ul>";
 					// Print the warning message.
-					// TODO Another message should also appear if there is only one method and it is local pickup explaining that the reason is that the order is less than 25€.
-					echo "<div style=\"padding:10px;background-color:#e3e3e3;\">Només està disponible recollida a la botiga ja que tens productes que no es poden enviar, si vols modificar la comanda <a href=\"" . esc_url( wc_get_cart_url() ) . "\">fes clic aquí per tornar a la cistella</a>.</div>";
-					$only_local_pickup_enabled = true;
+					// TODO Make this message accessible from the WooCommerce settings. It would be difficult because it inlcudes a link to the cart.
+					// TODO The home delivery option may not be visible because the order should be at least 25€, how to make this clear to the user?
+					$slug_pag_modalitats_de_compra = get_permalink(5778); // The id of the page "modalitats de compra". (In my local WP is 4135)
+					$text_to_modalitats_de_compra = $slug_pag_modalitats_de_compra ? "<br />Aquí pots trobar <a href=\"" . $slug_pag_modalitats_de_compra . "\" target=\"_blank\">informació sobre les modalitats de compra</a>." : "";
+					echo "<div style=\"padding:10px;margin-top:12px;line-height:1.4rem;background-color:#efefef;\">Degut a certs productes que has afegit hi ha métodes d'enviament que no estan disponibles." . $text_to_modalitats_de_compra . "<br />Si vols modificar l'ordre per disposar de més opcions <a href=\"" . esc_url( wc_get_cart_url() ) . "\">fes clic aquí per tornar a la cistella</a>.</div>";
+					$only_local_pickup_and_home_delivery_enabled = true;
 				}
 			}
 
-			if (!$only_local_pickup_enabled) : ?>
+			if (!$only_local_pickup_and_home_delivery_enabled) : ?>
 
 			<ul id="shipping_method" class="woocommerce-shipping-methods">
 
