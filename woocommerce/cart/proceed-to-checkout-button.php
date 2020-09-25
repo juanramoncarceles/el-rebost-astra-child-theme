@@ -53,7 +53,7 @@ if (count($no_shipping_products) > 0) {
 
 <?php if (count($no_shipping_products) > 0 && !$are_all_selected_methods_localpickup_or_home_delivery) : /* Show the fake button that will trigger the message. */ ?>
 
-	<div id="no_shipping_message_alert" style="display:none;background-color:rgb(225,225,225);padding:15px;margin-bottom:20px;font-weight:bold;">
+	<div id="no_shipping_message_alert" style="display:none;background-color:#efefef;padding:15px;margin-bottom:20px;font-weight:bold;">
 		<?php
 			echo "<p>INFORMACIÓ IMPORTANT!<br/>Els següents productes només estan disponibles per recollida a la botiga o per entrega a domicili als següents municipis: St. Feliu de Llobregat, Molins de Rei, St. Joan Despí i St. Just Desvern. Si continues s'eliminaran de la cistella.</p><ul>";
 			foreach ($no_shipping_products as $product) {
