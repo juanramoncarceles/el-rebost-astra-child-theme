@@ -20,7 +20,7 @@ function enqueue_custom_styles_and_scripts() {
 
 	wp_enqueue_style( 'astra-child-el-rebost-theme-css', get_stylesheet_directory_uri() . '/style.css', array('astra-theme-css'), CHILD_THEME_ASTRA_CHILD_EL_REBOST_VERSION, 'all' );
 
-	// wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
+	wp_enqueue_script( 'main-custom-script-el-rebost', get_stylesheet_directory_uri() . '/script.js', array( 'jquery' ), '1.0.0', true );
 
 	if ( is_cart() ) {
 		wp_enqueue_script( 'cart-page-el-rebost', get_stylesheet_directory_uri() . '/js/cart_page.js', false, '1.0.0', true );
