@@ -480,7 +480,7 @@ function sell_by_weight_option_group() {
 		'value'       => get_post_meta( get_the_ID(), 'sell_weight_measure', true ),
 		//'wrapper_class' => 'show_if_downloadable',
 		'label'       => sprintf( 'Medida de peso (%s)', get_option('woocommerce_weight_unit') ),
-		'options'     => array( '' => 'Selecciona una opción', '50' => '50', '100' => '100'),
+		'options'     => array( '' => 'Selecciona una opción', '20' => '20', '50' => '50', '100' => '100'), // Should be integer values.
 		'desc_tip' => true,
 		'description' => 'Elegir la medida de peso. Utiliza las unidades indicadas en los ajustes de Woocommerce. Solo tiene efecto si se habilita la opción de vender por peso.',
 	) );
@@ -541,11 +541,7 @@ function change_product_price_html( $price, $product ) {
 
 // 	if ($sell_by_weight == "yes" && $weight_measure != "") {
 // 		$formatted_price = $cart_item["data"]->price;
-// 		if ($weight_measure == '100') {
-// 			return '<span class="woocommerce-Price-amount amount">' . format_price_by_weight_from_kg_to_g($formatted_price, 100) . ' <span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span></span>';
-// 		} else if ($weight_measure == '50') {
-// 			return '<span class="woocommerce-Price-amount amount">' . format_price_by_weight_from_kg_to_g($formatted_price, 50) . ' <span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span></span>';
-// 		}
+// 		return '<span class="woocommerce-Price-amount amount">' . format_price_by_weight_from_kg_to_g($formatted_price, intval($weight_measure)) . ' <span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol() . '</span></span>';
 // 	} else {
 // 		return $price;
 // 	}
@@ -611,11 +607,7 @@ function wc_recalc_prices_by_weight( $cart_object ) {
 		$weight_measure = get_post_meta( $product_id, 'sell_weight_measure', true );
 		if ($sell_by_weight == "yes" && $weight_measure != "") {
 			$price_num = wc_get_product( $product_id )->get_price();
-			if ($weight_measure == '100') {
-				$cart_item['data']->set_price( $price_num / 10 );
-			} else if ($weight_measure == '50') {
-				$cart_item['data']->set_price( $price_num / 20 );
-			}
+			$cart_item['data']->set_price( $price_num / (1000 / intval($weight_measure)) );
 		}
 	}
 }
