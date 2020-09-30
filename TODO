@@ -1,6 +1,4 @@
 PRIORITY:
-  ☐ Añadir la opción de vender por peso por 20g.
-  ☐ Dar estilo al buscador del menú.
   ☐ Error en el precio en tiempo real en la pagina de producto cuando el producto es variable y se vende por peso.
   ☐ Hacer que los mensajes de producto no enviable de la página de producto y del carrito sean personalizables por ellos desde el panel de WooCommerce. @high 
   ☐ Hacer que los productos relacionados correspondan a subcategorias en vez de categorias.
@@ -21,6 +19,7 @@ PRIORITY:
     En el caso de los pueblos que lo tienen gratis a partir de 25 si que tiene que salir ambos ya que el gratis es solo los viernes.
 
 OTHER:
+  ☐ Hacer que las variantes de venta por peso (20g, 50g, 100g) sean configurables desde los ajustes de WooCommerce para que puedan añadir y eliminar.
   ☐ No funciona el total de items del nuevo carrito del menu. El hook de Astra que inicialmente funcionaba ahora no funciona. Usar return en vez de echo? @low 
   ☐ Hacer que sea una web multilanguage. Entender la función __() y ver si la mejor opción es algún plugin como WMPL. @high 
     https://docs.woocommerce.com/document/woocommerce-localization/
@@ -37,6 +36,8 @@ Notas:
 
 
 Hecho:
+  ✔ Añadir la opción de vender por peso por 20g. @done(20-09-30 20:27)
+  ✔ Dar estilo al buscador del menú. @done(20-09-30 20:27)
   ✔ Añadir enlace a la página con la información sobre los envios en donde sea necesario (como en los items del carrito y al final del mensaje del checkout) para aclarar las dudas. @done(20-09-25 21:54)
   ✔ Hacer que los productos no enviables, sean solo enviables a los municipios gratuitos (Sant Feliu, Sant Just...). @high @done(20-09-23 23:00)
     Hay que modificar la logica del archivo "proceed-to-checkout-button.php"

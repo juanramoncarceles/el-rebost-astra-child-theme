@@ -148,24 +148,11 @@ ul.woocommerce-shipping-methods > li {
 }
 
 
-/********** CUSTOM SEARCH BAR IN MENU BY MODYFING THE DEFAULT ONE ************/
+/***************** CUSTOM SEARCH BAR IN MENU BY MODYFING THE ******************
+************************ DEFAULT ONE BY SMART WC SEARCH **********************/
 
 .ysm-search-widget .search-field[type="search"] {
   background-color: rgb(255, 255, 255);
-}
-
-.rebost-custom-search > .ysm-search-widget {
-  position: absolute;
-  top: 100%;
-  right: 0px;
-  transition: width 1s ease 0s, opacity 1s ease 0s;
-}
-
-.rebost-custom-search > .rebost-search-icon {
-  display: flex;
-  padding: 4px;
-  cursor: pointer;
-  background-color: transparent;
 }
 
 .rebost-custom-search form.search-form > .smart-search-results {
@@ -183,6 +170,20 @@ ul.woocommerce-shipping-methods > li {
 }
 
 @media (min-width: 922px) {
+  .rebost-custom-search > .ysm-search-widget {
+    position: absolute;
+    top: 100%;
+    right: 0px;
+    transition: width 1s, opacity 1s;
+  }
+  
+  .rebost-custom-search > .rebost-search-icon {
+    display: flex;
+    padding: 4px;
+    cursor: pointer;
+    background-color: transparent;
+  }
+
   .rebost-custom-search form.search-form button.search-submit {
     visibility: hidden;
   }  
