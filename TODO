@@ -1,4 +1,7 @@
 PRIORITY:
+  ☐ Add checkbox for privacy policy page in the checkout page. @high 
+  ☐ Show info message in the cart page below the shipping methods explaining the methods available and with a link to the page with the info.
+  ☐ Personalizar el email que reciben los usuarios tras realizar un pedido con el logo de El Rebost y los datos legales de la empresa.
   ☐ Error en el precio en tiempo real en la pagina de producto cuando el producto es variable y se vende por peso.
   ☐ Hacer que los mensajes de producto no enviable de la página de producto y del carrito sean personalizables por ellos desde el panel de WooCommerce. @high 
   ☐ Hacer que los productos relacionados correspondan a subcategorias en vez de categorias.
