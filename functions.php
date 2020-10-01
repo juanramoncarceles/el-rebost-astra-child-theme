@@ -923,3 +923,31 @@ function woocommerce_custom_product_add_to_cart_text( $output, $instance ) {
 		return $output;
 	}
 }
+
+
+// ****************************************************************************
+// *********** PRIVACY POLICY ACCEPTANCE CHECKBOX ON CHECKOUT PAGE ************
+/**
+ * @see https://themeskills.com/add-privacy-checkbox-gdpr-woocoommerce-checkout/
+ */ 
+
+add_action( 'woocommerce_review_order_before_submit', 'add_privacy_checkbox', 9 );
+
+function add_privacy_checkbox() {
+	woocommerce_form_field( 'privacy_policy', array(
+		'type' => 'checkbox',
+		'class' => array('form-row privacy'),
+		'label_class' => array('woocommerce-form__label woocommerce-form__label-for-checkbox checkbox'),
+		'input_class' => array('woocommerce-form__input woocommerce-form__input-checkbox input-checkbox'),
+		'required' => true,
+		'label' => 'He llegit i accepto la <a href="/politica-de-privacitat">política de privacitat</a>',
+	));
+}
+
+add_action( 'woocommerce_checkout_process', 'privacy_checkbox_error_message' );
+
+function privacy_checkbox_error_message() {
+	if ( ! (int) isset( $_POST['privacy_policy'] ) ) {
+		wc_add_notice( __( 'Has d\'acceptar la nostra política de privacitat per poder continuar.' ), 'error' );
+	}
+}

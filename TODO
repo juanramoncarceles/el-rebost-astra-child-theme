@@ -1,5 +1,5 @@
 PRIORITY:
-  ☐ Add checkbox for privacy policy page in the checkout page. @high 
+  ☐ Facebook connection had an error. Check the configuration of "Facebook pixel".
   ☐ Show info message in the cart page below the shipping methods explaining the methods available and with a link to the page with the info.
   ☐ Personalizar el email que reciben los usuarios tras realizar un pedido con el logo de El Rebost y los datos legales de la empresa.
   ☐ Error en el precio en tiempo real en la pagina de producto cuando el producto es variable y se vende por peso.
@@ -39,6 +39,7 @@ Notas:
 
 
 Hecho:
+  ✔ Add checkbox for privacy policy page in the checkout page. @high @done(20-10-01 20:48)
   ✔ Añadir la opción de vender por peso por 20g. @done(20-09-30 20:27)
   ✔ Dar estilo al buscador del menú. @done(20-09-30 20:27)
   ✔ Añadir enlace a la página con la información sobre los envios en donde sea necesario (como en los items del carrito y al final del mensaje del checkout) para aclarar las dudas. @done(20-09-25 21:54)
