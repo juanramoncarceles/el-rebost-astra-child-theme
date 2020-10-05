@@ -49,6 +49,18 @@ function food_css_icon(){
 	</style>';
 }
 
+
+// ****************************************************************************
+// *********** ADDED VERIFICATION FOR CONNECTION BETWEEN FB AND WC ************
+// ****************************************************************************
+
+function add_facebook_domain_verification_tag() {
+  echo '<meta name="facebook-domain-verification" content="m2ndf0kgfmzkyliyw2n4phk3znzf6m" />';
+}
+
+add_action('wp_head', 'add_facebook_domain_verification_tag');
+
+
 // ****************************************************************************
 // ******************** CUSTOM ADDITIONAL INFO META BOX ***********************
 // ****************************************************************************
