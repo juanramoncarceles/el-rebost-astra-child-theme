@@ -39,6 +39,7 @@ Notas:
 
 
 Hecho:
+  ✔ Put in the orders also the weight for the products sold by weight. Those are located in the WooCommerce panel. @done(20-10-08 00:23)
   ✔ Add checkbox for privacy policy page in the checkout page. @high @done(20-10-01 20:48)
   ✔ Añadir la opción de vender por peso por 20g. @done(20-09-30 20:27)
   ✔ Dar estilo al buscador del menú. @done(20-09-30 20:27)

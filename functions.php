@@ -963,3 +963,23 @@ function privacy_checkbox_error_message() {
 		wc_add_notice( __( 'Has d\'acceptar la nostra política de privacitat per poder continuar.' ), 'error' );
 	}
 }
+
+
+// ****************************************************************************
+// ************************ ADD WEIGHT TO ORDER ITEMS *************************
+// ****************************************************************************
+// This way it is displayed in the order page that the user sees as well as the admin one.
+
+add_action( 'woocommerce_checkout_create_order_line_item', 'custom_checkout_create_order_line_item', 20, 4 );
+
+function custom_checkout_create_order_line_item( $item, $cart_item_key, $values, $order ) {
+
+	$sell_by_weight = get_post_meta( $item['product_id'], 'sell_by_weight', true );
+	$weight_measure = get_post_meta( $item['product_id'], 'sell_weight_measure', true );
+	
+	if ($sell_by_weight == "yes" && $weight_measure != "") {
+		$product_quantity = $item['quantity'];
+		$item->update_meta_data( 'Pes total', $product_quantity * $weight_measure . " " . get_option('woocommerce_weight_unit') );
+	}
+
+}
