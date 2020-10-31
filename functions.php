@@ -103,6 +103,16 @@ function elrebost_register_settings() {
 		'shipping_methods_cart_message',
 		'sanitize_text_field'
 	);
+	register_setting(
+		'elrebost_custom_settings',
+		'only_pickup_and_home_cart_item_message',
+		'sanitize_text_field'
+	);
+	register_setting(
+		'elrebost_custom_settings',
+		'url_to_page_with_shipping_methods_info',
+		'sanitize_text_field'
+	);
 
 	// Creation of sections to group the settings.
 	add_settings_section(
@@ -121,7 +131,7 @@ function elrebost_register_settings() {
 	// Addition of the fields to the page.
 	add_settings_field(
 		'product_only_pickup_and_home_delivery_message', // Field ID.
-		'Message for the product pages, visible for products that are only for local pick up and home delivery', // Field title.
+		'Message for the product pages, visible for products that are only for local pickup and home delivery', // Field title.
 		'elrebost_product_delivery_message_text_field_html', // Function which prints the field.
 		'elrebost-custom-settings', // The options page slug.
 		'elrebost_product_page_settings_id', // Section ID.
@@ -152,6 +162,28 @@ function elrebost_register_settings() {
 			'class' => 'elrebost-setting',
 		)
 	);
+	add_settings_field(
+		'only_pickup_and_home_cart_item_message',
+		'Short message for the cart page, located after each item that is only available for local pickup and home delivery',
+		'elrebost_cart_item_message_text_field_html',
+		'elrebost-custom-settings',
+		'elrebost_cart_page_settings_id',
+		array(
+			'label_for' => 'only_pickup_and_home_cart_item_message',
+			'class' => 'elrebost-setting',
+		)
+	);
+	add_settings_field(
+		'url_to_page_with_shipping_methods_info',
+		'If you want the short message above to also be a link to a page with more info put the complete url (https://...) here',
+		'elrebost_shipping_methods_info_page_url_text_field_html',
+		'elrebost-custom-settings',
+		'elrebost_cart_page_settings_id',
+		array(
+			'label_for' => 'url_to_page_with_shipping_methods_info',
+			'class' => 'elrebost-setting',
+		)
+	);
 
 }
 
@@ -175,6 +207,22 @@ function elrebost_shipping_methods_message_text_field_html() {
 	printf(
 		'<input type="text" id="shipping_methods_cart_message" name="shipping_methods_cart_message" value="%s" style="width:100&percnt;;" />',
 		esc_attr( $shipping_methods_message_in_cart )
+	);
+}
+
+function elrebost_cart_item_message_text_field_html() {
+	$cart_item_message_only_pickup_and_home = get_option( 'only_pickup_and_home_cart_item_message' );
+	printf(
+		'<input type="text" id="only_pickup_and_home_cart_item_message" name="only_pickup_and_home_cart_item_message" value="%s" style="width:100&percnt;;" />',
+		esc_attr( $cart_item_message_only_pickup_and_home )
+	);
+}
+
+function elrebost_shipping_methods_info_page_url_text_field_html() {
+	$shipping_methods_info_page_url = get_option( 'url_to_page_with_shipping_methods_info' );
+	printf(
+		'<input type="text" id="url_to_page_with_shipping_methods_info" name="url_to_page_with_shipping_methods_info" placeholder="https://www.example.com/info/" value="%s" style="width:100&percnt;;" />',
+		esc_attr( $shipping_methods_info_page_url )
 	);
 }
 
@@ -990,16 +1038,19 @@ function my_hide_shipping_when_free_is_available( $rates ) {
 // ********* ADDITIONAL MESSAGES FOR PRODUCTS ON PRODUCT PAGE & CART **********
 // ****************************************************************************
 
-// TODO Make the message available to set from the WC admin UI.
-// TODO Set there a color picker to choose the color and maybe bold.
-
-// Add a info text on the cart item title indicating that the product is only for local pickup.
+// Adds an info text under the cart items that are 'no-shipping' if the text value has been set from the custom options page.
 function action_after_cart_item_title( $cart_item, $cart_item_key ) {
-	$slug_pag_modalitats_de_compra = get_permalink(5778); // The id of the page "modalitats de compra". (In my local WP is 4135)
-	$text_to_modalitats_de_compra = $slug_pag_modalitats_de_compra ? "<a href=\"" . $slug_pag_modalitats_de_compra . "\" target=\"_blank\">recollida a botiga i entrega a domicili</a>" : "recollida a botiga i entrega a domicili";
-	$custom_product_message = "Només disponible per " . $text_to_modalitats_de_compra;
 	if ($cart_item['data']->get_shipping_class() == 'no-shipping') {
-		echo "<small style=\"display:block;\">" . $custom_product_message . "</small>";
+		$cart_item_message_only_pickup_and_home = get_option( 'only_pickup_and_home_cart_item_message' );
+		$shipping_methods_info_page_url = get_option( 'url_to_page_with_shipping_methods_info' );
+		$custom_product_message = "";
+		if (!empty($cart_item_message_only_pickup_and_home)) {
+			$custom_product_message = '<small>' . $cart_item_message_only_pickup_and_home . '</small>';
+			if (!empty($shipping_methods_info_page_url)) {
+				$custom_product_message = '<a href="' . $shipping_methods_info_page_url . '" target="_blank">' . $custom_product_message . '</a>';
+			}
+			echo '<div>' . $custom_product_message . '</div>';
+		}
 	}
 };
 
