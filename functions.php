@@ -51,6 +51,135 @@ function food_css_icon(){
 
 
 // ****************************************************************************
+// ************* ADD A CUSTOM OPTIONS PAGE FOR EL REBOST THINGS ***************
+// ****************************************************************************
+
+add_action( 'admin_menu', 'elrebost_options_page' );
+
+function elrebost_options_page() {
+	add_options_page(
+		'El Rebost custom settings', // Browser tab title.
+		'El Rebost settings', // Title under WP options.
+		'manage_options', // Capability to access the page.
+		'elrebost-custom-settings', // The page URL slug.
+		'elrebost_settings_page_content', // Callback function with content.
+		2 // Priority.
+	);
+}
+ 
+function elrebost_settings_page_content() {
+	echo '<div class="wrap">
+	<h1>El Rebost settings</h1>
+	<form method="post" action="options.php">';
+
+		settings_fields( 'elrebost_custom_settings' ); // Settings group name.
+		do_settings_sections( 'elrebost-custom-settings' );
+		submit_button();
+
+	echo '</form></div>';
+}
+
+
+// ****************************************************************************
+// ********** ADD A FIELD IN THE CUSTOM OPTIONS PAGE CREATED ABOVE ************
+// ****************************************************************************
+
+add_action( 'admin_init',  'elrebost_register_settings' );
+
+function elrebost_register_settings() {
+
+	// Registration of the settings.
+	register_setting(
+		'elrebost_custom_settings', // Settings group name.
+		'product_only_pickup_and_home_delivery_message', // Option name.
+		'sanitize_text_field' // Sanitization function.
+	);
+	register_setting(
+		'elrebost_custom_settings',
+		'show_payment_methods_in_product_page',
+	);
+	register_setting(
+		'elrebost_custom_settings',
+		'shipping_methods_cart_message',
+		'sanitize_text_field'
+	);
+
+	// Creation of sections to group the settings.
+	add_settings_section(
+		'elrebost_product_page_settings_id', // Section ID.
+		'Product pages settings', // Title (if needed), otherwise empty string.
+		'', // Callback function (if needed).
+		'elrebost-custom-settings' // The options page slug.
+	);
+	add_settings_section(
+		'elrebost_cart_page_settings_id',
+		'Cart page settings',
+		'', // Callback function (if needed).
+		'elrebost-custom-settings'
+	);
+
+	// Addition of the fields to the page.
+	add_settings_field(
+		'product_only_pickup_and_home_delivery_message', // Field ID.
+		'Message for the product pages, visible for products that are only for local pick up and home delivery', // Field title.
+		'elrebost_product_delivery_message_text_field_html', // Function which prints the field.
+		'elrebost-custom-settings', // The options page slug.
+		'elrebost_product_page_settings_id', // Section ID.
+		array(
+			'label_for' => 'product_only_pickup_and_home_delivery_message',
+			'class' => 'elrebost-setting', // For <tr> element.
+		)
+	);
+	add_settings_field(
+		'show_payment_methods_in_product_page',
+		'Show the available payment methods in the product pages',
+		'elrebost_product_show_payments_checkbox_field_html',
+		'elrebost-custom-settings',
+		'elrebost_product_page_settings_id',
+		array(
+			'label_for' => 'show_payment_methods_in_product_page',
+			'class' => 'elrebost-setting',
+		)
+	);
+	add_settings_field(
+		'shipping_methods_cart_message',
+		'Message for the cart page, located after the shipping methods to add any extra information about them',
+		'elrebost_shipping_methods_message_text_field_html',
+		'elrebost-custom-settings',
+		'elrebost_cart_page_settings_id',
+		array(
+			'label_for' => 'shipping_methods_cart_message',
+			'class' => 'elrebost-setting',
+		)
+	);
+
+}
+
+function elrebost_product_delivery_message_text_field_html() {
+	$delivery_methods_message = get_option( 'product_only_pickup_and_home_delivery_message' );
+	printf(
+		'<textarea id="product_only_pickup_and_home_delivery_message" name="product_only_pickup_and_home_delivery_message" rows="3" style="width:100&percnt;;">%s</textarea>',
+		esc_attr( $delivery_methods_message )
+	);
+}
+
+function elrebost_product_show_payments_checkbox_field_html() {
+	$show_payment_methods = get_option( 'show_payment_methods_in_product_page' );
+	printf(
+		'<input type="checkbox" id="show_payment_methods_in_product_page" name="show_payment_methods_in_product_page" value="1" ' . checked(1, $show_payment_methods, false) . '/>'
+	);
+}
+
+function elrebost_shipping_methods_message_text_field_html() {
+	$shipping_methods_message_in_cart = get_option( 'shipping_methods_cart_message' );
+	printf(
+		'<input type="text" id="shipping_methods_cart_message" name="shipping_methods_cart_message" value="%s" style="width:100&percnt;;" />',
+		esc_attr( $shipping_methods_message_in_cart )
+	);
+}
+
+
+// ****************************************************************************
 // *********** ADDED VERIFICATION FOR CONNECTION BETWEEN FB AND WC ************
 // ****************************************************************************
 
@@ -726,14 +855,17 @@ add_action( 'woocommerce_before_add_to_cart_button', 'action_wc_live_product_tot
 
 // Show a message depending on the total amount and the shipping methods avaialble.
 function action_woocommerce_after_shipping_calculator() {
-	$total_price = WC()->cart->total;
+	//$total_price = WC()->cart->total;
 	// Get the customer post code.
 	//echo WC()->customer->get_shipping_postcode();
 	// Get the shipping methods.
 	//print_r(WC()->shipping->get_shipping_methods());
 	// Get the packages.
 	//print_r(WC()->shipping()->get_packages());
-	// Get the available shipping methods for the first package. TODO first package hard coded is not a good idea.
+
+	/* FRAGMENT OF OLD CODE THAT WAS SHOWING A DIFFERENT MESSAGE DEPENDING ON THE SHIPPING METHODS AVAILABLE. NOT RELIABLE.
+	// Get the available shipping methods for the first package.
+	// TODO first package hard coded is not a good idea, however they don't expect to be using the packages feature.
 	$available_methods = WC()->shipping()->get_packages()[0]['rates'];
 	
 	$local_pickup = 0;
@@ -763,16 +895,16 @@ function action_woocommerce_after_shipping_calculator() {
 	if ($message !== '') {
 		echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\">" . $message . "</div>";
 	}
+	*/
 
-	// This is an alternative that uses hardcoded price values instead.
-	// if ($total_price < 25) {
-	// 	echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\"><span>L'enviament a domicili está disponible només amb una compra de com a mínim 25€.</span></div>";
-	// } else if ($total_price >= 25 && $total_price < 80) {
-	// 	echo "<div style=\"padding: 5px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #e1e1e1;\"><span>L'enviament es gratuït a partir de 80€ i també als seguents municipis....</span></div>";
-	// }
+	// Shows the message only if it has been set.
+	$shipping_methods_message_in_cart = get_option( 'shipping_methods_cart_message' );
+	if (!empty($shipping_methods_message_in_cart)) {
+		echo "<div style=\"padding: 6px;border: 1px solid #ddd;margin-bottom: 10px; background-color: #fbfbfb;\">" . $shipping_methods_message_in_cart . "</div>";
+	}
 };
 
-// add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_shipping_calculator', 10, 0 ); 
+add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_shipping_calculator', 10, 0 ); 
 
 
 // ****************************************************************************
@@ -874,16 +1006,39 @@ function action_after_cart_item_title( $cart_item, $cart_item_key ) {
 add_action( 'woocommerce_after_cart_item_name', 'action_after_cart_item_title', 10, 2 );
 
 
-// Add a info text on the product page indicating that the product is only for local pickup.
+// Add a info text on the product page indicating that the product is only for local pickup and home delivery.
 function action_add_no_shipping_waring() {
-	global $product;
-	$custom_product_message = 'Aquest producte no s\'envia. Només està disponible per l\'opció d\'entrega a domicili (Sant Feliu de Llobregat, Molins de Rei, Sant Just Desvern, Sant Joan Despí) o bé per recollir a la botiga.';
-	if ($product->get_shipping_class() == 'no-shipping') {
-		echo "<p style=\"background-color:#f7f6f7;padding:10px;font-weight:bold;\">" . $custom_product_message . "</p>";
+	$delivery_methods_message = get_option( 'product_only_pickup_and_home_delivery_message' );
+	if (!empty($delivery_methods_message)) {
+		global $product;
+		if ($product->get_shipping_class() == 'no-shipping') {
+			echo "<p style=\"background-color:#f7f6f7;padding:10px;font-weight:bold;\">" . $delivery_methods_message . "</p>";
+		}
 	}
 }
 
 add_action('woocommerce_single_product_summary', 'action_add_no_shipping_waring', 15);
+
+
+// Show payment methods available in the product page.
+function action_add_payment_methods_available() {
+	$show_payment_methods = get_option( 'show_payment_methods_in_product_page' );
+	if (!empty($show_payment_methods)) {
+		$available_payment_methods = WC()->payment_gateways->get_available_payment_gateways();
+		if (!empty($available_payment_methods)) {
+			echo '<div>
+			<p style="margin-bottom:0;"><strong>Mètodes de pagament acceptats:</strong></p>
+			<ul>';
+			foreach( $available_payment_methods as $method ) {
+				echo '<li>' . $method->title . '</li>';
+			}
+			echo '</ul>
+			</div>';
+		}
+	}
+}
+
+add_action('woocommerce_single_product_summary', 'action_add_payment_methods_available', 50);
 
 
 // ****************************************************************************
