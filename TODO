@@ -39,6 +39,8 @@ Notas:
 
 
 Hecho:
+  ✔ Creada página de opciones con varios campos para poder personalizar los contenidos de varios mensajes. @done(20-11-01 17:45)
+  ✔ Añadido apartado con los métodos de pago disponibles en las páginas de producto ya que Google Merchant lo solicitaba. @done(20-11-01 17:45)
   ✔ Put in the orders also the weight for the products sold by weight. Those are located in the WooCommerce panel. @done(20-10-08 00:23)
   ✔ Add checkbox for privacy policy page in the checkout page. @high @done(20-10-01 20:48)
   ✔ Añadir la opción de vender por peso por 20g. @done(20-09-30 20:27)
