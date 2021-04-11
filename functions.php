@@ -1009,38 +1009,87 @@ function action_show_custom_shipping_method_data( $method, $package_index ) {
 add_action( 'woocommerce_after_shipping_rate', 'action_show_custom_shipping_method_data', 10, 2 );
 
 
-// ****************************************************************************
-// ****** HIDE OTHER SHIPPING METHODS WHEN "FREE SHIPPING" IS AVAILABLE *******
-// ****************************************************************************
+// ***********************************************************************************************
+// *** REMOVE HOME DELIVERY SHIPPING METHOD IF TOTAL WITHOUT SPECIAL PRODUCTS IS BELOW MINIMUM ***
+// ***********************************************************************************************
 
 /**
- * Hide shipping rates when free shipping is available.
- * Updated to show also local pickup options.
- *
- * @see https://docs.woocommerce.com/document/hide-other-shipping-methods-when-free-shipping-is-available/
- * @param array $rates Array of rates found for the package.
- * @return array
+ * Returns the id of the home delivery shipping method to remove in case it has to be removed because
+ * the amount of products without counting the no-shipping-no-count is less than the minimum.
  */
-function my_hide_shipping_when_free_is_available( $rates ) {
-	$free_and_local = array();
-	foreach ( $rates as $rate_id => $rate ) {
-		if ( 'free_shipping' === $rate->method_id || 'local_pickup' === $rate->method_id ) {
-			$free_and_local[ $rate_id ] = $rate;
+function get_id_of_home_delivery_shipping_method_to_remove() {
+	$packages = WC()->cart->get_shipping_packages();
+
+	// Don't use more than one package in Woocommerce since we are considering always only the first.
+	$first_package_available_methods = WC()->shipping()->load_shipping_methods($packages[0]);
+
+	// Get the home delivery shipping method if it exists.
+	$home_delivery_method = null;
+	foreach($first_package_available_methods as $method) {
+		if (array_key_exists("shipping_custom_field_is_home_delivery", $method->instance_settings) && $method->instance_settings["shipping_custom_field_is_home_delivery"] == "yes") {
+			$home_delivery_method = $method;
+			break;
 		}
 	}
-	return ! empty( $free_and_local ) ? $free_and_local : $rates;
+
+	// Only if there is a home delivery method check the cart amount to return the method id.
+	if (isset($home_delivery_method)) {
+		// Accumulated total for all the cart products excluding products that are only for home
+		// delivery or local pickup and that also their price doesn't add to the free minimum.
+		$cart_contents_total_without_no_shipping_special = 0;
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( $cart_item['data']->get_shipping_class() != 'no-shipping-no-count' ) {
+				$cart_contents_total_without_no_shipping_special += $cart_item['line_total'];
+			}
+		}
+	
+		// If the accumulated total is less than the minimum for home delivery return the home delivery method id.
+		if ($cart_contents_total_without_no_shipping_special < $home_delivery_method->instance_settings["min_amount"]) {
+			return $home_delivery_method->id . ":" . $home_delivery_method->instance_id;
+		}
+	}
+
+	return "";
 }
 
-// add_filter( 'woocommerce_package_rates', 'my_hide_shipping_when_free_is_available', 100 );
+/**
+ * In the cart, the products with shipping class "no-shipping-no-count" don't count towards the minimum price for home delivery.
+ * To achieve that the cart total for the minimum to show home delivery is calculated without the "no-shipping-no-count" products.
+ * @param array $rates Array of rates found for the package.
+ */
+function remove_home_delivery_if_total_whitout_special_products_is_lower($rates) {
+	// The id of the shipping method to remove in case it has to be removed.
+	$home_delivery_method_id = get_id_of_home_delivery_shipping_method_to_remove();
+	
+	if ($home_delivery_method_id) {
+		foreach ( $rates as $rate_key => $rate ) {
+			if ( $home_delivery_method_id == $rate->id ) {
+				unset( $rates[ $rate_key ] );
+			}
+		}
+	}
+
+	// OTHER LOGIC TO REMOVE PAID SHIPPING METHODS WHEN FREE ONES ARE AVAILABLE.
+	// foreach ( $rates as $rate_key => $rate ) {
+	// 	if ( 'free_shipping' === $rate->method_id || 'local_pickup' === $rate->method_id ) {
+	//    Here I would get only the free shipping and local pickup ones, skipping the paid ones...
+	// 	}
+	// }
+
+	return $rates;	
+}
+
+add_filter( 'woocommerce_package_rates', 'remove_home_delivery_if_total_whitout_special_products_is_lower', 100 );
 
 
 // ****************************************************************************
 // ********* ADDITIONAL MESSAGES FOR PRODUCTS ON PRODUCT PAGE & CART **********
 // ****************************************************************************
 
-// Adds an info text under the cart items that are 'no-shipping' if the text value has been set from the custom options page.
+// Adds an info text under the cart items that are 'no-shipping' and 'no-shipping-no-count' if the text value has been set from the custom options page.
 function action_after_cart_item_title( $cart_item, $cart_item_key ) {
-	if ($cart_item['data']->get_shipping_class() == 'no-shipping') {
+	$item_shipping_class = $cart_item['data']->get_shipping_class();
+	if ($item_shipping_class == 'no-shipping' || $item_shipping_class == 'no-shipping-no-count') {
 		$cart_item_message_only_pickup_and_home = get_option( 'only_pickup_and_home_cart_item_message' );
 		$shipping_methods_info_page_url = get_option( 'url_to_page_with_shipping_methods_info' );
 		$custom_product_message = "";
@@ -1062,7 +1111,8 @@ function action_add_no_shipping_waring() {
 	$delivery_methods_message = get_option( 'product_only_pickup_and_home_delivery_message' );
 	if (!empty($delivery_methods_message)) {
 		global $product;
-		if ($product->get_shipping_class() == 'no-shipping') {
+		$product_shipping_class = $product->get_shipping_class();
+		if ($product_shipping_class == 'no-shipping' || $product_shipping_class == 'no-shipping-no-count') {
 			echo "<p style=\"background-color:#f7f6f7;padding:10px;font-weight:bold;\">" . $delivery_methods_message . "</p>";
 		}
 	}
@@ -1110,7 +1160,8 @@ function remove_no_shipping_items_if_param_exists() {
 	//$remove_noshipping_items = $_GET['remove_noshipping_items']; /* This would also work but is not recommended. */
 	if ($remove_noshipping_items === 'true') {
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-			if ( $cart_item['data']->get_shipping_class() == 'no-shipping' ) {
+			$item_shipping_class = $cart_item['data']->get_shipping_class();
+			if ( $item_shipping_class == 'no-shipping' || $item_shipping_class == 'no-shipping-no-count' ) {
 				WC()->cart->remove_cart_item( $cart_item_key );
 			}
  		}

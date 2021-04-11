@@ -30,7 +30,8 @@ $no_shipping_products = [];
 
 // Get all the names of the products that cannot be shipped.
 foreach ($cart_items as $cart_item => $values) {
-	if ($values['data']->get_shipping_class() == 'no-shipping') {
+	$item_shipping_class = $values['data']->get_shipping_class();
+	if ($item_shipping_class == 'no-shipping' || $item_shipping_class == 'no-shipping-no-count') {
 		array_push($no_shipping_products, $values['data']->get_title());
 	}
 }
@@ -39,7 +40,7 @@ $selected_shipping_methods_ids = WC()->session->get( 'chosen_shipping_methods' )
 
 $are_all_selected_methods_localpickup_or_home_delivery = true;
 
-// Only run if there is at least one product with no-shipping, otherwise there is no need to check the shipping methods.
+// Only run if there is at least one product with no-shipping or no-shipping-no-count, otherwise there is no need to check the shipping methods.
 if (count($no_shipping_products) > 0) {
 	// If all in the array are not 'local_pickup' neither 'home delivery' then nothing will happen.
 	array_walk($selected_shipping_methods_ids, function($method_id) use(&$are_all_selected_methods_localpickup_or_home_delivery) {

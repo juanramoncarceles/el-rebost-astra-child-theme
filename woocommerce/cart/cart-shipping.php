@@ -31,8 +31,9 @@ $calculator_text          = '';
 
 			<?php /* PHP block added by El Rebost */
 
-			// If page is not cart and there is at least one product with no-shipping only create the "local pickup" and "home delivery" options and show a message indicating
-			// that the reason is that there are some products that are only available for this kind of shipping methods, to change the order click a link to go to the cart.
+			// If page is not cart and there is at least one product with no-shipping or no-shipping-no-count only create the
+			// "local pickup" and "home delivery" options and show a message indicating that the reason is that there are some products
+			// that are only available for this kind of shipping methods, to change the order click a link to go to the cart.
 
 			$only_local_pickup_and_home_delivery_enabled = false;
 
@@ -42,7 +43,8 @@ $calculator_text          = '';
 
 				// Check if there is at least one that requires local pickup.
 				foreach ($cart_items as $cart_item => $values) {
-					if ($values['data']->get_shipping_class() == 'no-shipping') {
+					$item_shipping_class = $values['data']->get_shipping_class();
+					if ($item_shipping_class == 'no-shipping' || $item_shipping_class == 'no-shipping-no-count') {
 						$product_no_shipping_exists = true;
 						break;
 					}
