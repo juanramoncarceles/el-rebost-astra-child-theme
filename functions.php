@@ -1039,7 +1039,7 @@ function get_id_of_home_delivery_shipping_method_to_remove() {
 		$cart_contents_total_without_no_shipping_special = 0;
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['data']->get_shipping_class() != 'no-shipping-no-count' ) {
-				$cart_contents_total_without_no_shipping_special += $cart_item['line_total'];
+				$cart_contents_total_without_no_shipping_special += ($cart_item['data']->price * $cart_item['quantity']);
 			}
 		}
 	
