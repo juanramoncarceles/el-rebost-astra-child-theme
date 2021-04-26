@@ -956,7 +956,7 @@ add_action( 'woocommerce_before_shipping_calculator', 'action_woocommerce_after_
 
 
 // ****************************************************************************
-// ******** ADDITIONAL CUSTOM FIELDS ON THE SHIPPING METHOD SETTINGS **********
+// ******** ADDITIONAL CUSTOM FIELDS ON THE SHIPPING METHODS SETTINGS *********
 // ****************************************************************************
 
 // Adds a custom field to each shipping method using a filter at woocommerce start.
@@ -965,20 +965,32 @@ add_action('woocommerce_init', 'shipping_instance_form_fields_filters');
 function shipping_instance_form_fields_filters() {
   $shipping_methods = WC()->shipping->get_shipping_methods();
 	foreach($shipping_methods as $shipping_method) {
+		if ($shipping_method->id == "flat_rate") {
+			add_filter('woocommerce_shipping_instance_form_fields_' . $shipping_method->id, 'flat_rate_extra_fields', 10, 1);
+			add_filter('woocommerce_shipping_instance_form_fields_' . $shipping_method->id, 'free_shipping_and_flat_rate_extra_fields', 10, 1);
+		} else if ($shipping_method->id == "free_shipping") {
+			add_filter('woocommerce_shipping_instance_form_fields_' . $shipping_method->id, 'free_shipping_and_flat_rate_extra_fields', 10, 1);
+		}
     add_filter('woocommerce_shipping_instance_form_fields_' . $shipping_method->id, 'shipping_instance_form_add_extra_fields', 10, 1);
   }
 }
 
-// Field to save a custom text for the shipping method that can be displayed later on.
+// Custom fields added to all shipping methods options.
 function shipping_instance_form_add_extra_fields( $settings ) {
-  $settings['shipping_custom_field_for_display'] = [
+	// Field to save a custom text for the shipping method that can be displayed later on.
+	$settings['shipping_custom_field_for_display'] = [
     'title'       => 'Información extra para mostrar',
     'type'        => 'text', 
 		'placeholder' => 'Entrega solo los lunes...',
 		'desc_tip'		=> true,
     'description' => 'Añade información extra que puede resultar útil en relación al método de envío. Se muestra bajo el título del método de envío en la página del carrito y de pago.'
 	];
-	
+
+  return $settings;
+}
+
+// Custom fields that are added only to free_shipping and flat_rate shipping options.
+function free_shipping_and_flat_rate_extra_fields( $settings ) {
 	// Field to indicate if it is a method for home delivery / entrega a domicilio.
 	$settings['shipping_custom_field_is_home_delivery'] = [
 		'title'       => 'Es entrega a domicilio',
@@ -988,7 +1000,28 @@ function shipping_instance_form_add_extra_fields( $settings ) {
 		'description' => 'Marcar si se trata del método de envío de entrega a domicilio solo para ciertos municipios.'
 	];
 
-  return $settings;
+	return $settings;
+}
+
+// Custom fields that are added only for the flat rate shipping options.
+function flat_rate_extra_fields( $settings ) {
+	$settings['flat_rate_shipping_custom_field_minimum_price'] = [
+    'title'       => 'Coste mínimo',
+    'type'        => 'number', 
+		'placeholder' => '10',
+		'desc_tip'		=> true,
+    'description' => 'Los usuarios tendrán que gastar esta cantidad para ver este método. Si el campo "Precio antes del mínimo" se especifica, se aplicará ese precio hasta que no se alcance este mínimo, si no se especifica, este método simplemente no aparecera hasta no alcanzar el mínimo.'
+	];
+
+	$settings['flat_rate_shipping_custom_field_price_before_minimum'] = [
+    'title'       => 'Precio antes del mínimo',
+    'type'        => 'number', 
+		'placeholder' => '5',
+		'desc_tip'		=> true,
+    'description' => 'Precio que se aplicará al método de envío si el coste del carrito no llega al mínimo especificado en "Coste mínimo". En el caso de que "Coste mínimo" no tenga valor este campo será ignorado.'
+	];
+
+	return $settings;
 }
 
 
@@ -1010,17 +1043,18 @@ add_action( 'woocommerce_after_shipping_rate', 'action_show_custom_shipping_meth
 
 
 // ***********************************************************************************************
-// *** REMOVE HOME DELIVERY SHIPPING METHOD IF TOTAL WITHOUT SPECIAL PRODUCTS IS BELOW MINIMUM ***
+// *********************************** MODIFY SHIPPING METHODS ***********************************
 // ***********************************************************************************************
 
 /**
- * Returns the id of the home delivery shipping method to remove in case it has to be removed because
+ * Returns the data of the home delivery shipping method to modify in case it has to be modified because
  * the amount of products without counting the no-shipping-no-count is less than the minimum.
+ * The products with shipping class "no-shipping-no-count" don't count towards the minimum price for home delivery.
  */
-function get_id_of_home_delivery_shipping_method_to_remove() {
+function get_data_of_home_delivery_shipping_method_to_modify() {
 	$packages = WC()->cart->get_shipping_packages();
 
-	// Don't use more than one package in Woocommerce since we are considering always only the first.
+	// IMPORTANT: Don't use more than one package in Woocommerce since we are considering always only the first.
 	$first_package_available_methods = WC()->shipping()->load_shipping_methods($packages[0]);
 
 	// Get the home delivery shipping method if it exists.
@@ -1028,14 +1062,14 @@ function get_id_of_home_delivery_shipping_method_to_remove() {
 	foreach($first_package_available_methods as $method) {
 		if (array_key_exists("shipping_custom_field_is_home_delivery", $method->instance_settings) && $method->instance_settings["shipping_custom_field_is_home_delivery"] == "yes") {
 			$home_delivery_method = $method;
-			break;
+			break; // TODO this is considering that there is max only one home delivery but can be more...
 		}
 	}
 
-	// Only if there is a home delivery method check the cart amount to return the method id.
+	// Only if there is a home delivery method check the cart amount to return the method data.
 	if (isset($home_delivery_method)) {
-		// Accumulated total for all the cart products excluding products that are only for home
-		// delivery or local pickup and that also their price doesn't add to the free minimum.
+		// The accumulated total for all the cart products excluding products "no-shipping-no-count" (products
+		// that are only for home delivery and local pickup, and that their price doesn't add to the free minimum).
 		$cart_contents_total_without_no_shipping_special = 0;
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			if ( $cart_item['data']->get_shipping_class() != 'no-shipping-no-count' ) {
@@ -1043,31 +1077,75 @@ function get_id_of_home_delivery_shipping_method_to_remove() {
 			}
 		}
 	
-		// If the accumulated total is less than the minimum for home delivery return the home delivery method id.
-		if ($cart_contents_total_without_no_shipping_special < $home_delivery_method->instance_settings["min_amount"]) {
-			return $home_delivery_method->id . ":" . $home_delivery_method->instance_id;
+		// Get the minimum for the home delivery free shipping or flat rate.
+		$home_delivery_minimum = 0;
+		if ($home_delivery_method->id === "free_shipping") {
+			$home_delivery_minimum = $home_delivery_method->instance_settings["min_amount"];
+		} else if ($home_delivery_method->id === "flat_rate") {
+			$home_delivery_minimum = $home_delivery_method->instance_settings["flat_rate_shipping_custom_field_minimum_price"];
+		}
+
+		// If the accumulated total is less than the minimum for home delivery return the home delivery method data.
+		if ($cart_contents_total_without_no_shipping_special < $home_delivery_minimum) {
+			return [$home_delivery_method->id, $home_delivery_method->id . ":" . $home_delivery_method->instance_id];
 		}
 	}
 
-	return "";
+	return null;
 }
 
 /**
- * In the cart, the products with shipping class "no-shipping-no-count" don't count towards the minimum price for home delivery.
- * To achieve that the cart total for the minimum to show home delivery is calculated without the "no-shipping-no-count" products.
  * @param array $rates Array of rates found for the package.
  */
-function remove_home_delivery_if_total_whitout_special_products_is_lower($rates) {
-	// The id of the shipping method to remove in case it has to be removed.
-	$home_delivery_method_id = get_id_of_home_delivery_shipping_method_to_remove();
+function modify_shipping_methods($rates) {
+	// The data of the home delivery shipping method to be modified in case it has to be modified.
+	$home_delivery_method_data = get_data_of_home_delivery_shipping_method_to_modify();
 	
-	if ($home_delivery_method_id) {
+	// TODO this should be organized differently without the "if"
+
+	// Home delivery method modification if cart total without no-shipping-no-count products is lower.
+	if ($home_delivery_method_data) {
+		if ($home_delivery_method_data[0] === "free_shipping") {
+			// If it is a "home delivery - free shipping" remove it.
+			foreach ( $rates as $rate_key => $rate ) {
+				if ( $home_delivery_method_data[1] == $rate->id ) {
+					unset( $rates[ $rate_key ] );
+				}
+			}
+		} else if ($home_delivery_method_data[0] === "flat_rate") {
+			// If it is a "home delivery - flat rate" change its cost if the corresponding settings are available.
+			foreach ( $rates as $rate_key => $rate ) {
+				if ( $home_delivery_method_data[1] == $rate->id ) {
+					$price_before = get_option('woocommerce_' . str_replace(":", "_", $rate->id) . '_settings')['flat_rate_shipping_custom_field_price_before_minimum'];
+					// If the "price before" also exists apply it, othewise hide the method.
+					if ($price_before) {
+						$rate->cost = $price_before;
+					} else {
+						unset( $rates[ $rate_key ] );
+					}
+				}
+			}
+		}
+	} else {
+		// Other modifications for non home delivery shipping methods.
+		$cart_total = WC()->cart->cart_contents_total + WC()->cart->tax_total;
 		foreach ( $rates as $rate_key => $rate ) {
-			if ( $home_delivery_method_id == $rate->id ) {
-				unset( $rates[ $rate_key ] );
+			if ( 'flat_rate' === $rate->method_id ) {
+				$minimum = get_option('woocommerce_' . str_replace(":", "_", $rate->id) . '_settings')['flat_rate_shipping_custom_field_minimum_price']; // ERROR check first if it exists
+				// If it has a minimum set continue checking, otherwise do nothing.
+				if ($minimum && $cart_total < $minimum) {
+					$price_before = get_option('woocommerce_' . str_replace(":", "_", $rate->id) . '_settings')['flat_rate_shipping_custom_field_price_before_minimum'];
+					// If the "price before" also exists apply it, othewise hide the method.
+					if ($price_before) {
+						$rate->cost = $price_before;
+					} else {
+						unset( $rates[ $rate_key ] );
+					}
+				}
 			}
 		}
 	}
+
 
 	// OTHER LOGIC TO REMOVE PAID SHIPPING METHODS WHEN FREE ONES ARE AVAILABLE.
 	// foreach ( $rates as $rate_key => $rate ) {
@@ -1079,7 +1157,7 @@ function remove_home_delivery_if_total_whitout_special_products_is_lower($rates)
 	return $rates;	
 }
 
-add_filter( 'woocommerce_package_rates', 'remove_home_delivery_if_total_whitout_special_products_is_lower', 100 );
+add_filter( 'woocommerce_package_rates', 'modify_shipping_methods', 100 );
 
 
 // ****************************************************************************
