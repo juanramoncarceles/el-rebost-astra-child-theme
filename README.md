@@ -11,8 +11,11 @@ Theme main features:
 
 ### Home delivery set up
 
-Those products are identified with shipping classes.
+This is only applicable to "free shipping" and "flat rate" shipping methods.
 
+To indicate that a method is home delivery there is a checkbox in the shipping method settings.
+
+To indicate that a product can only be sent with home delivery methods a shipping class should be applied.
 Shipping classes are created in: *WooCommerce > Settings > Shipping > Shipping classes*
 
 There are two variantions:
@@ -22,3 +25,17 @@ There are two variantions:
 
 - **Special**: Products that behave like the regular ones but that doesn't count to reach the minimum price for home delivery. They rely on regular home delivery products to reach the minimum.
   - Shipping class slug: **no-shipping-no-count**
+
+---
+
+All shipping methods have a field "Información extra para mostrar" to set a message that is displayed under the method.
+
+The shipping method flat_rate also has the options "Coste mínimo" and "Precio antes del mínimo" to set a minimum price for the regular price to apply, and to show an alternative price if the cart total is below the minimum. In case the minimum cost is set but the price below minimum is not set the method will not be displayed if the cart total is below the minimum.
+
+---
+
+### Sell by weight
+
+To sell by weight the weight unit is the one set in: *WooCommerce > Settings > Products > Measurements > Weight unit*
+The available amounts are 20, 50 and 100, beacuse it was designed for "g".
+The price set in the product page for products sold by weight is the price for 1Kg of the product.
