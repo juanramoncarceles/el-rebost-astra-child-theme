@@ -1096,12 +1096,25 @@ function modify_shipping_methods($rates) {
 		}
 	}
 
-	// OTHER LOGIC TO REMOVE PAID SHIPPING METHODS WHEN FREE ONES ARE AVAILABLE.
-	// foreach ( $rates as $rate_key => $rate ) {
-	// 	if ( 'free_shipping' === $rate->method_id || 'local_pickup' === $rate->method_id ) {
-	//    Here I would get only the free shipping and local pickup ones, skipping the paid ones...
-	// 	}
-	// }
+	// Remove paid shipping methods (flat_rate) when free ones (free_shipping / local_pickup) are available.
+	$new_rates = array();
+	foreach ( $rates as $rate_key => $rate ) {
+		// Only modify rates if free shipping is present.
+		if ( "free_shipping" === $rate->method_id ) {
+			$new_rates[ $rate_key ] = $rate;
+			break;
+		}
+	}
+	if ( !empty($new_rates) ) {
+		// Save local pickup if it's present.
+		foreach ( $rates as $rate_key => $rate ) {
+			if ( 'local_pickup' === $rate->method_id ) {
+				$new_rates[$rate_key] = $rate;
+				break;
+			}
+		}
+		return $new_rates;
+	}
 
 	return $rates;	
 }
